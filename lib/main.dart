@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Simple Suppers',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
@@ -41,6 +41,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         body: Center(
+          // TODO: Need to make a separate component for this
+          // and again, put all the recipes in a separate list
+          // instead of hardcoding them here
           child: ListView(children: [
             Container(
               margin: const EdgeInsets.all(10.0),
