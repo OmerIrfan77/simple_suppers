@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// Http package
+import 'package:http/http.dart' as http;
+
 void main() {
   runApp(const MyApp());
 }
@@ -133,5 +136,16 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ));
+  }
+}
+
+Future<void> fetchData() async {
+  final response = await http.get(Uri.parse('https:localhost:3000/recipes'));
+  if (response.statusCode == 200) {
+    // Handle successful response
+    print('API Response: ${response.body}');
+  } else {
+    // Handle error response
+    print('API Error: ${response.statusCode}');
   }
 }
