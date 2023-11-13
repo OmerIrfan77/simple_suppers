@@ -25,7 +25,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     ),
     const BottomNavigationBarItem(
       icon: Icon(Icons.shuffle),
-      label: 'Shuffle',
+      label: 'Random',
     ),
     const BottomNavigationBarItem(
       icon: Icon(Icons.person),
