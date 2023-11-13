@@ -140,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 Future<void> fetchData() async {
-  final response = await http.get(Uri.parse('https:localhost:3000/recipes'));
+  final response = await http.get(Uri.parse('https:localhost:3000/api'));
   if (response.statusCode == 200) {
     // Handle successful response
     print('API Response: ${response.body}');
