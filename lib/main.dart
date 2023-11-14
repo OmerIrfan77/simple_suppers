@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'add_recipe.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  int currentPageIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,53 +87,63 @@ class _MyHomePageState extends State<MyHomePage> {
           ]),
         ),
         bottomNavigationBar: NavigationBar(
-          backgroundColor: Colors.grey[850],
-          indicatorColor: Colors.orange[900],
+            backgroundColor: Colors.grey[850],
+            indicatorColor: Colors.orange[900],
 
-          // TODO: Put all NavigationDestinations in a separate list instead of
-          // hardcoding them here
-
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: 'Home',
-              selectedIcon: Icon(
-                Icons.home_filled,
+            // TODO: Put all NavigationDestinations in a separate list instead of
+            // hardcoding them here
+            onDestinationSelected: (index) {
+              setState(() {
+                currentPageIndex = index;
+                if (index == 1) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => RecipeFormPage()),
+                  );
+                }
+              });
+            },
+            selectedIndex: currentPageIndex,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home),
+                label: 'Home',
+                selectedIcon: Icon(
+                  Icons.home_filled,
+                ),
               ),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.add_box_outlined,
-                color: Colors.grey,
+              NavigationDestination(
+                icon: Icon(
+                  Icons.add_box_outlined,
+                  color: Colors.grey,
+                ),
+                label: 'Create',
+                selectedIcon: Icon(Icons.add_box),
               ),
-              label: 'Create',
-              selectedIcon: Icon(Icons.add_box),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.search,
-                color: Colors.grey,
+              NavigationDestination(
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.grey,
+                ),
+                label: 'Search',
+                selectedIcon: Icon(Icons.search),
               ),
-              label: 'Search',
-              selectedIcon: Icon(Icons.search),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.shuffle,
-                color: Colors.grey,
+              NavigationDestination(
+                icon: Icon(
+                  Icons.shuffle,
+                  color: Colors.grey,
+                ),
+                label: 'Shuffle',
+                selectedIcon: Icon(Icons.shuffle),
               ),
-              label: 'Shuffle',
-              selectedIcon: Icon(Icons.shuffle),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
+              NavigationDestination(
+                icon: Icon(
+                  Icons.person,
+                  color: Colors.grey,
+                ),
+                label: 'Profile',
+                selectedIcon: Icon(Icons.person),
               ),
-              label: 'Profile',
-              selectedIcon: Icon(Icons.person),
-            ),
-          ],
-        ));
+            ]));
   }
 }
