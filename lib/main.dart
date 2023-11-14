@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'RecipeDetails.dart';
 
 void main() {
   runApp(const MyApp());
@@ -59,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                   borderRadius: BorderRadius.circular(10.0)),
-              child: const Column(
+              child: Column(
                 children: [
                   Text(
                     'Welcome to SimpleSuppers!',
@@ -79,6 +80,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     style: TextStyle(color: Colors.grey),
                   ),
                   SizedBox(height: 10),
+                  // temporary button to display RecipeDetails
+                  ElevatedButton(
+                      child: Text('Go to recipe'),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RecipeDetails()),
+                        );
+                      }),
                 ],
               ),
             ),
