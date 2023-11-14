@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/components/recipe_preview.dart';
+import 'package:simple_suppers/screens/test_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -45,43 +47,12 @@ class _MyHomePageState extends State<MyHomePage> {
           // and again, put all the recipes in a separate list
           // instead of hardcoding them here
           child: ListView(children: [
-            Container(
-              margin: const EdgeInsets.all(10.0),
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 10,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: const Column(
-                children: [
-                  Text(
-                    'Welcome to SimpleSuppers!',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'SimpleSuppers is a recipe app that allows you to search for recipes based on ingredients you have on hand. You can also create your own recipes and share them with the community!',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'To get started, click the "Create" button below to create your first recipe!',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
-                ],
-              ),
-            ),
+            RecipePreview(onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TestScreen()),
+              );
+            }),
           ]),
         ),
         bottomNavigationBar: NavigationBar(
