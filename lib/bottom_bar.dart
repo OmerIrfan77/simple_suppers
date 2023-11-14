@@ -47,7 +47,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
       iconSize: 30,
       showUnselectedLabels: false,
       backgroundColor: Colors.grey[850],
-      unselectedItemColor: Colors.white,
+      unselectedItemColor: Colors.grey,
       selectedItemColor: Colors.orange[800],
     );
   }
