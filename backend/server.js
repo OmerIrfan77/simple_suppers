@@ -38,17 +38,6 @@ app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
 
-// Test the database connection after the server is running
-db.query('SELECT 1 + 1 AS solution', (error, results) => {
-    if (error) {
-        console.error('Database connection error:', error);
-        throw error;
-    }
-    console.log('Database connection successful:', results[0].solution);
-});
-
-// ... (other setup code)
-
 process.on('SIGINT', () => {
     db.end((err) => {
         if (err) {
