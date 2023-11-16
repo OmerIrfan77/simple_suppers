@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'RecipeDetails.dart';
+import 'package:simple_suppers/screens/recipe_details.dart';
 
 void main() {
   runApp(const MyApp());

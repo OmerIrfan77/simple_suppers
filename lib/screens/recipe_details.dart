@@ -10,14 +10,14 @@ class RecipeDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-          body: Container(
-            child: (Column(
+          body: ListView(children: [
+            (Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // Stack text on picture
                 Stack(children: [
-                  const Image(
-                    image: AssetImage('images/pizza.jpg'),
-                  ),
+                  Image.network(
+                      'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg'),
                   const Positioned(
                     bottom: 10,
                     left: 10,
@@ -80,9 +80,9 @@ class RecipeDetails extends StatelessWidget {
                         fontSize: 12,
                       ),
                     )),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: const Align(
+                const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       'Ingredients',
@@ -94,11 +94,7 @@ class RecipeDetails extends StatelessWidget {
                   ),
                 ),
                 Flexible(
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    childAspectRatio: 8,
-                    mainAxisSpacing: 0,
-                    padding: EdgeInsets.only(left: 15),
+                  child: Column(
                     // Generate 10 placeholder widgets that display as ingredients.
                     children: List.generate(10, (index) {
                       return Wrap(children: [
@@ -109,9 +105,9 @@ class RecipeDetails extends StatelessWidget {
                     }),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: const Align(
+                const Padding(
+                  padding: EdgeInsets.all(15.0),
+                  child: Align(
                     alignment: Alignment.topLeft,
                     child: Text(
                       'Step-by-step instructions',
@@ -125,7 +121,7 @@ class RecipeDetails extends StatelessWidget {
                 const Text('Put the oven on 200 degrees celcius'),
               ],
             )),
-          ),
+          ]),
           bottomNavigationBar: NavigationBar(
             backgroundColor: Colors.grey[850],
             indicatorColor: Colors.orange[900],
