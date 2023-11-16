@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/bottom_bar.dart';
+// import the 'api_service.dart' file from backend folder
+import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +33,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // List to hold the results from the API call
+  List<dynamic> data = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +88,44 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
+
+            //Test code creating a button that fetches data from API and then adds the list of recipes to the page
+            Container(
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
+                child: Column(children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      int recipeId = 1;
+                      setState(() {
+                        data = [];
+                      });
+                      try {
+                        final fetchedData = await fetchAllRecipes();
+                        setState(() {
+                          data = fetchedData;
+                          data.forEach((element) {
+                            print(element['title']);
+                          });
+                        });
+                      } catch (e) {
+                        print(e);
+                      }
+                    },
+                    child: const Text("Fetch"),
+                  ),
+                  // Display a Text widget for each element in the data list
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return Text(data[index]['title'].toString() +
+                          '\n' +
+                          data[index]['instructions'].toString() +
+                          '\n');
+                    },
+                  )
+                ]))
           ]),
         ),
         bottomNavigationBar: const CustomBottomNavigationBar());
