@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/bottom_bar.dart';
 
 // Http package
 import 'package:http/http.dart' as http;
@@ -87,55 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ]),
         ),
-        bottomNavigationBar: NavigationBar(
-          backgroundColor: Colors.grey[850],
-          indicatorColor: Colors.orange[900],
-
-          // TODO: Put all NavigationDestinations in a separate list instead of
-          // hardcoding them here
-
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: 'Home',
-              selectedIcon: Icon(
-                Icons.home_filled,
-              ),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.add_box_outlined,
-                color: Colors.grey,
-              ),
-              label: 'Create',
-              selectedIcon: Icon(Icons.add_box),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.search,
-                color: Colors.grey,
-              ),
-              label: 'Search',
-              selectedIcon: Icon(Icons.search),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.shuffle,
-                color: Colors.grey,
-              ),
-              label: 'Shuffle',
-              selectedIcon: Icon(Icons.shuffle),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
-              ),
-              label: 'Profile',
-              selectedIcon: Icon(Icons.person),
-            ),
-          ],
-        ));
+        bottomNavigationBar: const CustomBottomNavigationBar());
   }
 }
 
