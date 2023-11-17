@@ -97,6 +97,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       setState(() {
                         data = [];
                       });
+                      addRecipe(
+                        instructions: 'Test instructions again',
+                        difficulty: 2,
+                        time: 30,
+                        budget: 'Low',
+                        creatorId: 1,
+                        title: 'Test title',
+                        shortDescription: 'Short description',
+                        isPublic: 1,
+                        rating: 4,
+                        imageLink: 'https://image.jpg',
+                      );
                       try {
                         final fetchedData = await fetchAllRecipes();
                         setState(() {
