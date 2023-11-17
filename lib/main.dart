@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/bottom_bar.dart';
 // import the 'api_service.dart' file from backend folder
@@ -47,9 +48,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         body: Center(
-          // TODO: Need to make a separate component for this
-          // and again, put all the recipes in a separate list
-          // instead of hardcoding them here
           child: ListView(children: [
             Container(
               margin: const EdgeInsets.all(10.0),
@@ -96,7 +94,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(children: [
                   ElevatedButton(
                     onPressed: () async {
-                      int recipeId = 1;
                       setState(() {
                         data = [];
                       });
@@ -104,12 +101,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         final fetchedData = await fetchAllRecipes();
                         setState(() {
                           data = fetchedData;
-                          data.forEach((element) {
-                            print(element['title']);
-                          });
+                          for (var element in data) {
+                            if (kDebugMode) {
+                              print(element['title']);
+                            }
+                          }
                         });
                       } catch (e) {
-                        print(e);
+                        if (kDebugMode) {
+                          print(e);
+                        }
                       }
                     },
                     child: const Text("Fetch"),
@@ -119,10 +120,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     shrinkWrap: true,
                     itemCount: data.length,
                     itemBuilder: (context, index) {
-                      return Text(data[index]['title'].toString() +
-                          '\n' +
-                          data[index]['instructions'].toString() +
-                          '\n');
+                      return Text(
+                          '${data[index]['title']}\n${data[index]['instructions']}\n');
                     },
                   )
                 ]))
