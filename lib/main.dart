@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
+import 'package:simple_suppers/bottom_bar.dart';
+// import the 'api_service.dart' file from backend folder
+import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +35,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // List to hold the results from the API call
+  List<dynamic> data = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,9 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         body: Center(
-          // TODO: Need to make a separate component for this
-          // and again, put all the recipes in a separate list
-          // instead of hardcoding them here
           child: ListView(children: [
             Container(
               margin: const EdgeInsets.all(10.0),
@@ -83,56 +87,47 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
+
+            //Test code creating a button that fetches data from API and then adds the list of recipes to the page
+            Container(
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
+                child: Column(children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      setState(() {
+                        data = [];
+                      });
+                      try {
+                        final fetchedData = await fetchAllRecipes();
+                        setState(() {
+                          data = fetchedData;
+                          for (var element in data) {
+                            if (kDebugMode) {
+                              print(element['title']);
+                            }
+                          }
+                        });
+                      } catch (e) {
+                        if (kDebugMode) {
+                          print(e);
+                        }
+                      }
+                    },
+                    child: const Text("Fetch"),
+                  ),
+                  // Display a Text widget for each element in the data list
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return Text(
+                          '${data[index]['title']}\n${data[index]['instructions']}\n');
+                    },
+                  )
+                ]))
           ]),
         ),
-        bottomNavigationBar: NavigationBar(
-          backgroundColor: Colors.grey[850],
-          indicatorColor: Colors.orange[900],
-
-          // TODO: Put all NavigationDestinations in a separate list instead of
-          // hardcoding them here
-
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: 'Home',
-              selectedIcon: Icon(
-                Icons.home_filled,
-              ),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.add_box_outlined,
-                color: Colors.grey,
-              ),
-              label: 'Create',
-              selectedIcon: Icon(Icons.add_box),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.search,
-                color: Colors.grey,
-              ),
-              label: 'Search',
-              selectedIcon: Icon(Icons.search),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.shuffle,
-                color: Colors.grey,
-              ),
-              label: 'Shuffle',
-              selectedIcon: Icon(Icons.shuffle),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
-              ),
-              label: 'Profile',
-              selectedIcon: Icon(Icons.person),
-            ),
-          ],
-        ));
+        bottomNavigationBar: const CustomBottomNavigationBar());
   }
 }
