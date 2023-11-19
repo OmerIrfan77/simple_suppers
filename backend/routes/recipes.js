@@ -33,6 +33,64 @@ router.get('/recipes/:id', (req, res) => {
     });
 });
 
-// More routes can be added for creating, updating, and deleting recipes
+// Post a recipe
+router.post('/recipes', (req, res) => {
+    const db = require('../server').db;
+    try {
+        const {
+            instructions,
+            difficulty,
+            time,
+            budget,
+            creator_id,
+            title,
+            short_description,
+            is_public,
+            rating,
+            image_link
+        } = req.body;
+
+        db.getConnection((err, connection) => {
+            if (err) {
+                console.error('Error getting MySQL connection: ', err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            }
+
+            const sql = `
+                INSERT INTO recipes 
+                (instructions, difficulty, time, budget, creator_id, title, short_description, is_public, rating, image_link) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+
+            const values = [
+                instructions,
+                difficulty,
+                time,
+                budget,
+                creator_id,
+                title,
+                short_description,
+                is_public,
+                rating,
+                image_link
+            ];
+
+            connection.query(sql, values, (queryErr, results) => {
+                connection.release(); // Release the connection
+
+                if (queryErr) {
+                    console.error('Error executing MySQL query: ', queryErr);
+                    return res.status(500).json({ error: 'Internal Server Error' });
+                }
+
+                // Respond with the ID of the inserted recipe
+                res.json({ recipeId: results.insertId });
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 module.exports = router;
