@@ -11,7 +11,8 @@ class RecipeDetails extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        title: const Text('Recipe Details',
+        leading: const BackButton(color: Colors.white),
+        title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: ListView(children: [
