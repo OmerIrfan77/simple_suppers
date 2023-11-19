@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/screens/test_screen.dart';
 import 'package:simple_suppers/bottom_bar.dart';
