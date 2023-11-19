@@ -1,5 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/screens/login.dart';
+import 'package:simple_suppers/screens/recipe_details.dart';
+import 'package:simple_suppers/components/recipe_preview.dart';
+import 'package:simple_suppers/screens/test_screen.dart';
+import 'package:simple_suppers/bottom_bar.dart';
+// import the 'api_service.dart' file from backend folder
+import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,6 +38,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // List to hold the results from the API call
+  List<dynamic> data = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,97 +52,69 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.white, fontWeight: FontWeight.bold)),
         ),
         body: Center(
-          // TODO: Need to make a separate component for this
-          // and again, put all the recipes in a separate list
-          // instead of hardcoding them here
           child: ListView(children: [
+            RecipePreview(onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const RecipeDetails(
+                          title: 'Hello World',
+                        )),
+              );
+            }),
+
+            //Test code creating a button that fetches data from API and then adds the list of recipes to the page
             Container(
-              margin: const EdgeInsets.all(10.0),
-              padding: const EdgeInsets.all(10.0),
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 10,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                  borderRadius: BorderRadius.circular(10.0)),
-              child: const Column(
-                children: [
-                  Text(
-                    'Welcome to SimpleSuppers!',
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
+                margin: const EdgeInsets.all(10.0),
+                padding: const EdgeInsets.all(10.0),
+                child: Column(children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      setState(() {
+                        data = [];
+                      });
+                      addRecipe(
+                        instructions: 'Test instructions again',
+                        difficulty: 2,
+                        time: 30,
+                        budget: 'Low',
+                        creatorId: 1,
+                        title: 'Test title',
+                        shortDescription: 'Short description',
+                        isPublic: 1,
+                        rating: 4,
+                        imageLink: 'https://image.jpg',
+                      );
+                      try {
+                        final fetchedData = await fetchAllRecipes();
+                        setState(() {
+                          data = fetchedData;
+                          for (var element in data) {
+                            if (kDebugMode) {
+                              print(element['title']);
+                            }
+                          }
+                        });
+                      } catch (e) {
+                        if (kDebugMode) {
+                          print(e);
+                        }
+                      }
+                    },
+                    child: const Text("Fetch"),
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    'SimpleSuppers is a recipe app that allows you to search for recipes based on ingredients you have on hand. You can also create your own recipes and share them with the community!',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'To get started, click the "Create" button below to create your first recipe!',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                  SizedBox(height: 10),
-                ],
-              ),
-            ),
+                  // Display a Text widget for each element in the data list
+                  ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return Text(
+                          '${data[index]['title']}\n${data[index]['instructions']}\n');
+                    },
+                  )
+                ])),
           ]),
         ),
-        bottomNavigationBar: NavigationBar(
-          backgroundColor: Colors.grey[850],
-          indicatorColor: Colors.orange[900],
-
-          // TODO: Put all NavigationDestinations in a separate list instead of
-          // hardcoding them here
-
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home),
-              label: 'Home',
-              selectedIcon: Icon(
-                Icons.home_filled,
-              ),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.add_box_outlined,
-                color: Colors.grey,
-              ),
-              label: 'Create',
-              selectedIcon: Icon(Icons.add_box),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.search,
-                color: Colors.grey,
-              ),
-              label: 'Search',
-              selectedIcon: Icon(Icons.search),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.shuffle,
-                color: Colors.grey,
-              ),
-              label: 'Shuffle',
-              selectedIcon: Icon(Icons.shuffle),
-            ),
-            NavigationDestination(
-              icon: Icon(
-                Icons.person,
-                color: Colors.grey,
-              ),
-              label: 'Profile',
-              selectedIcon: Icon(Icons.person),
-            ),
-          ],
-        ));
+        bottomNavigationBar: const CustomBottomNavigationBar());
   }
 }
