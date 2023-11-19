@@ -55,7 +55,10 @@ class _MyHomePageState extends State<MyHomePage> {
             RecipePreview(onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TestScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const RecipeDetails(
+                          title: 'Hello World',
+                        )),
               );
             }),
 
