@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 // ingredients & instructions, for now.
 
 class RecipeDetails extends StatelessWidget {
-  final String recipeId;
+  final int recipeId;
   const RecipeDetails(
       {super.key, required String title, required this.recipeId});
 
