@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
+import 'package:simple_suppers/screens/add_recipe.dart';
 import 'package:simple_suppers/screens/test_screen.dart';
 import 'package:simple_suppers/bottom_bar.dart';
 // import the 'api_service.dart' file from backend folder
@@ -37,8 +38,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // List to hold the results from the API call
-  List<dynamic> data = [];
+  int _currentIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,70 +63,25 @@ class _MyHomePageState extends State<MyHomePage> {
               style: const TextStyle(
                   color: Colors.white, fontWeight: FontWeight.bold)),
         ),
-        body: Center(
-          child: ListView(children: [
-            RecipePreview(onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const RecipeDetails(
-                          title: 'Hello World',
-                        )),
-              );
-            }),
-
-            //Test code creating a button that fetches data from API and then adds the list of recipes to the page
-            Container(
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                child: Column(children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        data = [];
-                      });
-                      addRecipe(
-                        instructions: 'Test instructions again',
-                        difficulty: 2,
-                        time: 30,
-                        budget: 'Low',
-                        creatorId: 1,
-                        title: 'Test title',
-                        shortDescription: 'Short description',
-                        isPublic: 1,
-                        rating: 4,
-                        imageLink: 'https://image.jpg',
-                      );
-                      try {
-                        final fetchedData = await fetchAllRecipes();
-                        setState(() {
-                          data = fetchedData;
-                          for (var element in data) {
-                            if (kDebugMode) {
-                              print(element['title']);
-                            }
-                          }
-                        });
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print(e);
-                        }
-                      }
-                    },
-                    child: const Text("Fetch"),
-                  ),
-                  // Display a Text widget for each element in the data list
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      return Text(
-                          '${data[index]['title']}\n${data[index]['instructions']}\n');
-                    },
-                  )
-                ])),
-          ]),
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          children: [
+            RecipeFormPage(),
+            RecipeFormPage(),
+            RecipeFormPage(),
+            // Add more views as needed
+          ],
         ),
-        bottomNavigationBar: const CustomBottomNavigationBar());
+        bottomNavigationBar: CustomBottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) {
+            _pageController.jumpToPage(index);
+          },
+        ));
   }
 }
