@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Define routes
 
-// Example: Get all recipes
+// Get all recipes
 router.get('/recipes', (req, res) => {
     const db = require('../server').db;
     console.log('DB: ', db);
@@ -19,7 +19,7 @@ router.get('/recipes', (req, res) => {
     });
 });
 
-// Example: Get a single recipe
+// Get a single recipe
 router.get('/recipes/:id', (req, res) => {
     const db = require('../server').db;
     const id = req.params.id;
@@ -92,5 +92,55 @@ router.post('/recipes', (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+
+// USER RELATED ROUTES
+
+// User registration
+router.post('/register', async (req, res) => {
+    const db = require('../server').db;
+    const { username, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword], (err, result) => {
+        if (err) {
+        console.error('Error registering user:', err);
+        res.status(500).json({ error: 'Internal server error' });
+        } else {
+        res.json({ message: 'User registered successfully' });
+        }
+    });
+});
+  
+//User login
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+        if (err) {
+        console.error('Error during login:', err);
+        res.status(500).json({ error: 'Internal server error' });
+        } else if (results.length > 0) {
+        const match = await bcrypt.compare(password, results[0].password);
+
+        if (match) {
+            const token = jwt.sign({ username }, 'your_secret_key', { expiresIn: '1h' });
+            res.json({ token });
+        } else {
+            res.status(401).json({ error: 'Invalid credentials' });
+        }
+        } else {
+        res.status(404).json({ error: 'User not found' });
+        }
+    });
+});
+
+// User logout
+router.post('/logout', (req, res) => {
+// Handle user logout
+});
+
+
+
 
 module.exports = router;
