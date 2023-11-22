@@ -3,7 +3,13 @@ import 'package:simple_suppers/components/labels.dart';
 
 class RecipePreview extends StatelessWidget {
   final void Function() onTap;
-  const RecipePreview({super.key, required this.onTap});
+  final String title;
+  final String? shortDescription;
+  const RecipePreview(
+      {super.key,
+      required this.onTap,
+      required this.title,
+      this.shortDescription});
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +18,11 @@ class RecipePreview extends StatelessWidget {
       child: Container(
           margin: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
-              color: Colors.white,
+              color: const Color.fromARGB(255, 249, 219, 206),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
+                  color:
+                      const Color.fromARGB(255, 193, 179, 154).withOpacity(0.7),
                   spreadRadius: 5,
                   blurRadius: 10,
                   offset: const Offset(0, 3), // changes position of shadow
@@ -45,21 +52,21 @@ class RecipePreview extends StatelessWidget {
                       width: 10.0), // Add some space between the image and text
 
                   // Text on the right side
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Pizza',
-                          style: TextStyle(
+                          title,
+                          style: const TextStyle(
                             fontSize: 20.0,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                             height:
                                 10.0), // Add some space between subtitle and labels
-                        Row(
+                        const Row(
                           children: [
                             DifficultyLabel(
                                 difficultyLevel: Difficulty.beginner),
@@ -67,7 +74,7 @@ class RecipePreview extends StatelessWidget {
                             TimeLabel(amount: '30', unit: TimeUnit.minutes),
                           ],
                         ),
-                        SizedBox(
+                        const SizedBox(
                             height:
                                 10.0), // Add some space between title and subtitle
                       ],
@@ -77,9 +84,10 @@ class RecipePreview extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.all(10.0),
-                child: const Text(
-                  'A short description of the recipe will be over here. Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                  style: TextStyle(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  shortDescription!,
+                  style: const TextStyle(
                     fontSize: 12.0,
                     color: Color.fromRGBO(97, 97, 97, 1),
                   ),

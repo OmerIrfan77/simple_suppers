@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/screens/login.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
-import 'package:simple_suppers/screens/test_screen.dart';
 import 'package:simple_suppers/bottom_bar.dart';
 // import the 'api_service.dart' file from backend folder
 import 'api_service.dart';
@@ -40,81 +38,65 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // List to hold the results from the API call
   List<dynamic> data = [];
+  Future<List<dynamic>> allRecipes() async {
+    return await fetchAllRecipes();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.orange[100],
-        appBar: AppBar(
-          backgroundColor: Colors.grey[850],
-          title: Text(widget.title,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold)),
+      backgroundColor: const Color.fromARGB(255, 255, 249, 240),
+      appBar: AppBar(
+        backgroundColor: Colors.grey[850],
+        title: Text(
+          widget.title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        body: Center(
-          child: ListView(children: [
-            RecipePreview(onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => RecipeDetails(
-                          title: 'Hello World',
-                        )),
-              );
-            }),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              FutureBuilder(
+                future: allRecipes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: List.generate(
+                        snapshot.data!.length,
+                        (index) => RecipePreview(
+                          title: snapshot.data![index]['title'],
+                          shortDescription: snapshot.data![index]
+                              ['short_description'],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RecipeDetails(
+                                  title: snapshot.data![index]['title'],
+                                  recipeId: snapshot.data![index]['id'],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  return const CircularProgressIndicator();
+                },
+              ),
+            ],
+          ),
 
-            //Test code creating a button that fetches data from API and then adds the list of recipes to the page
-            Container(
-                margin: const EdgeInsets.all(10.0),
-                padding: const EdgeInsets.all(10.0),
-                child: Column(children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      setState(() {
-                        data = [];
-                      });
-                      addRecipe(
-                        instructions: 'Test instructions again',
-                        difficulty: 2,
-                        time: 30,
-                        budget: 'Low',
-                        creatorId: 1,
-                        title: 'Test title',
-                        shortDescription: 'Short description',
-                        isPublic: 1,
-                        rating: 4,
-                        imageLink: 'https://image.jpg',
-                      );
-                      try {
-                        final fetchedData = await fetchAllRecipes();
-                        setState(() {
-                          data = fetchedData;
-                          for (var element in data) {
-                            if (kDebugMode) {
-                              print(element['title']);
-                            }
-                          }
-                        });
-                      } catch (e) {
-                        if (kDebugMode) {
-                          print(e);
-                        }
-                      }
-                    },
-                    child: const Text("Fetch"),
-                  ),
-                  // Display a Text widget for each element in the data list
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: data.length,
-                    itemBuilder: (context, index) {
-                      return Text(
-                          '${data[index]['title']}\n${data[index]['instructions']}\n');
-                    },
-                  )
-                ])),
-          ]),
         ),
-        bottomNavigationBar: const CustomBottomNavigationBar());
+      ),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
+    );
   }
 }
