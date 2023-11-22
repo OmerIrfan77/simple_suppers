@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const String apiUrl = 'http://localhost:3000/api/recipes';
+
 Future<List> fetchAllRecipes() async {
-  final response =
-      await http.get(Uri.parse('http://localhost:3000/api/recipes'));
+  final response = await http.get(Uri.parse(apiUrl));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -13,8 +14,7 @@ Future<List> fetchAllRecipes() async {
 }
 
 Future<List> fetchSingleRecipe(int id) async {
-  final response =
-      await http.get(Uri.parse('http://localhost:3000/api/recipes/$id'));
+  final response = await http.get(Uri.parse('$apiUrl/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -52,9 +52,6 @@ Future<void> addRecipe({
     return;
   }
 
-  const String apiUrl =
-      'http://localhost:3000/api/recipes'; // Replace with your actual API URL
-
   // Data to be sent in the request body
   final Map<String, dynamic> data = {
     'instructions': instructions,
@@ -89,6 +86,18 @@ Future<void> addRecipe({
   } catch (error) {
     // Handle network errors
     print('Error sending POST request: $error');
+  }
+}
+
+// Search function for searching all recipes that match a difficulty level
+Future<List> searchRecipeDifficulty(int difficulty) async {
+  final response =
+      await http.get(Uri.parse('$apiUrl/search?difficulty=$difficulty'));
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    return responseData;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
   }
 }
 

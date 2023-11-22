@@ -93,6 +93,28 @@ router.post('/recipes', (req, res) => {
     }
 });
 
+// Search recipes by difficulty
+router.get('/recipes/search', (req, res) => {
+    const db = require('../server').db;
+    const difficulty = req.query.difficulty; // Assuming you pass the difficulty as a query parameter
+
+    if (!difficulty) {
+        return res.status(400).json({ error: 'Difficulty parameter is required' });
+    }
+
+    const sql = 'SELECT * FROM recipes WHERE difficulty = ?';
+    const values = [difficulty];
+
+    db.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+            res.json(results);
+        }
+    });
+});
+
 
 // USER RELATED ROUTES
 
