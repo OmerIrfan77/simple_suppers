@@ -91,3 +91,38 @@ Future<void> addRecipe({
     print('Error sending POST request: $error');
   }
 }
+
+// User authentication functions //
+
+class AuthService {
+  final String baseUrl = 'http://localhost:3000/api';
+
+  Future register(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      body: jsonEncode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  Future login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      body: jsonEncode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  Future logout() async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {'Authorization': 'Bearer yourToken'},
+    );
+
+    return jsonDecode(response.body);
+  }
+}
