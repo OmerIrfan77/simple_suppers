@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class RecipeFormPage extends StatefulWidget {
+  const RecipeFormPage({super.key});
+
   @override
   _RecipeFormPageState createState() => _RecipeFormPageState();
 }
@@ -28,10 +30,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        // padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Image URL
               if (imageUrlController.text.isEmpty)
@@ -265,29 +265,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
         );
       },
     );
-  }
-
-  void sendRecipeToDatabase() {
-    // Implement API call to send recipe data to the database
-    // Make sure to use the values from the controllers and lists to send the relevant data
-    // For example, you can use titleController.text, descriptionController.text, etc.
-    // User ID should be retrieved from your authentication system or stored globally
-    // Replace the placeholder values with actual API endpoint and parameters
-    // Example: http.post('https://your-api-endpoint.com/add_recipe', body: {...});
-
-    // Dummy data for demonstration purposes
-    final Map<String, dynamic> recipeData = {
-      'title': titleController.text,
-      'description': descriptionController.text,
-      'time': timeController.text,
-      'difficulty': difficultyController.text,
-      'budget': budgetController.text,
-      'public': publicDropdownValue,
-      'steps': steps,
-      'user_id': 'user123', // Replace with actual user id logic
-    };
-
-    print('Sending Recipe Data to Database: $recipeData');
   }
 
   Future<void> addRecipe() async {
