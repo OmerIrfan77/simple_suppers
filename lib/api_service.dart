@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+const apiUrl = 'http://localhost:3000/api/recipes';
+
 Future<List> fetchAllRecipes() async {
-  final response =
-      await http.get(Uri.parse('http://localhost:3000/api/recipes'));
+  final response = await http.get(Uri.parse(apiUrl));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -13,11 +14,29 @@ Future<List> fetchAllRecipes() async {
 }
 
 Future<List> fetchSingleRecipe(int id) async {
-  final response =
-      await http.get(Uri.parse('http://localhost:3000/api/recipes/$id'));
+  final response = await http.get(Uri.parse('$apiUrl/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
+Future<List<Map<String, dynamic>>> searchRecipes(
+    {int? maxTime, int? maxDifficulty}) async {
+  // Build the URL with the query parameters
+  final Uri uri = Uri.parse('$apiUrl/search').replace(queryParameters: {
+    'maxTime': maxTime?.toString(),
+    'maxDifficulty': maxDifficulty?.toString(),
+  });
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    final List<dynamic> responseData = json.decode(response.body);
+    // Convert the response data to a List<Map<String, dynamic>>
+    return List<Map<String, dynamic>>.from(responseData);
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
@@ -63,9 +82,6 @@ Future<void> addRecipe({
     print('Invalid input values. Please check and try again.');
     return;
   }
-
-  const String apiUrl =
-      'http://localhost:3000/api/recipes'; // Replace with your actual API URL
 
   // Data to be sent in the request body
   final Map<String, dynamic> data = {

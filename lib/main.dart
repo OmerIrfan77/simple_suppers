@@ -8,6 +8,21 @@ import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
+  test();
+}
+
+Future<void> test() async {
+  // Test the API calls
+  try {
+    final List<Map<String, dynamic>> searchResults = await searchRecipes(
+      maxTime: 30, // Replace with your desired maxTime
+      maxDifficulty: 3, // Replace with your desired maxDifficulty
+    );
+
+    print('Search Results: $searchResults');
+  } catch (e) {
+    print('Error: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -93,7 +108,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
           ),
-
         ),
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(),
