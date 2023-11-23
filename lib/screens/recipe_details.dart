@@ -15,15 +15,18 @@ class RecipeDetails extends StatefulWidget {
 }
 
 class _RecipeDetailsState extends State<RecipeDetails> {
+  // TODO: Bring the correct recipe id from previous screen/preview
+  int recipeId = 1; // The recipe index to fetch, fixed number for now
   late List recipe; // The recipe data
-  int recipeId = 1; // The recipe index to fetch
+  late List ingredients; // The ingredients is a separete list
 
   @override
   void initState() {
     super.initState();
-    // async function fetchSingleRecipe() cannot run in iniState(), so
-    // this function is called instead.
+    // async functions fetchSingleRecipe() and fetchIngredients() cannot
+    // run inside iniState(), so this function is called instead.
     fetchRecipeDetails();
+    fetchRecipeIngredients();
   }
 
   Future<void> fetchRecipeDetails() async {
@@ -34,6 +37,17 @@ class _RecipeDetailsState extends State<RecipeDetails> {
       });
     } catch (e) {
       print("Could not fetch recipe");
+    }
+  }
+
+  Future<void> fetchRecipeIngredients() async {
+    try {
+      var data = await fetchIngredients(recipeId);
+      setState(() {
+        ingredients = data;
+      });
+    } catch (e) {
+      print("Could not fetch ingredients");
     }
   }
 
@@ -50,15 +64,14 @@ class _RecipeDetailsState extends State<RecipeDetails> {
         (Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Stack text on picture
+            // Stack recipe name and labels on picture
             Stack(children: [
-              Image.network(
-                  'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg'),
+              Image.network('${recipe[0]['image_link']}'),
               Positioned(
                   bottom: 10,
                   left: 10,
                   child: Text(
-                    '${recipe[recipeId - 1]['title']}',
+                    '${recipe[0]['title']}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 26,
@@ -74,8 +87,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                   bottom: 10,
                   right: 10,
                   child: TimeLabel(
-                      amount: '${recipe[recipeId - 1]['time']}',
-                      unit: TimeUnit.minutes))
+                      amount: '${recipe[0]['time']}', unit: TimeUnit.minutes))
             ]),
             // Description in orange box
             // Using Row() + Expanded() fill the horizontal space with orange container
@@ -86,7 +98,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     color: Colors.amber[900],
                     padding: const EdgeInsets.all(15),
                     child: Text(
-                      '${recipe[recipeId - 1]['shortDescription']}',
+                      '${recipe[0]['short_description']}',
                       style:
                           const TextStyle(color: Colors.white, fontSize: 12.0),
                     ),
@@ -96,7 +108,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
             ),
             // Ingredients below
             const Padding(
-              padding: EdgeInsets.all(15.0),
+              padding: EdgeInsets.only(left: 15.0, top: 15.0, bottom: 7.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
@@ -109,15 +121,17 @@ class _RecipeDetailsState extends State<RecipeDetails> {
               ),
             ),
             ListView.builder(
-              padding: const EdgeInsets.only(left: 15.0),
+              padding: const EdgeInsets.only(left: 15.0, bottom: 15.0),
               shrinkWrap: true,
-              itemCount: recipe.length,
+              itemCount: ingredients.length,
               itemBuilder: (context, index) {
-                return Text('${recipe[index]['ingredients']}');
+                return Text(
+                    '${ingredients[index]['quantity']} ${ingredients[index]['quantity_type']} ${ingredients[index]['name']}');
               },
             ),
+            // Recipe instructions
             const Padding(
-              padding: EdgeInsets.all(15.0),
+              padding: EdgeInsets.only(left: 15, top: 15, bottom: 7.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Text(
@@ -129,14 +143,10 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                 ),
               ),
             ),
-            ListView.builder(
+            Padding(
               padding: const EdgeInsets.only(left: 15.0),
-              shrinkWrap: true,
-              itemCount: recipe.length,
-              itemBuilder: (context, index) {
-                return Text('${recipe[index]['instructions']}');
-              },
-            ),
+              child: Text('${recipe[0]['instructions']}'),
+            )
           ],
         )),
       ]),
