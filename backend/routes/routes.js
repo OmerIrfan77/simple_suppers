@@ -8,7 +8,6 @@ const jwt = require('jsonwebtoken');
 // Get all recipes
 router.get('/recipes', (req, res) => {
     const db = require('../server').db;
-    console.log('DB: ', db);
     db.query('SELECT * FROM recipes', (error, results) => {
         if (error) {
             console.error('Error executing query:', error);
@@ -32,6 +31,45 @@ router.get('/recipes/:id', (req, res) => {
         }
     });
 });
+
+router.get('/recipes/search', (req, res) => {
+    const db = require('../server').db;
+    const { maxTime, maxDifficulty } = req.query;
+  
+    // Check if at least one parameter is provided
+    if (!maxTime && !maxDifficulty) {
+      return res.status(400).json({ error: 'At least one parameter (maxTime or maxDifficulty) is required' });
+    }
+  
+    // Build the WHERE clause based on provided parameters
+    let whereClause = '';
+    let params = [];
+  
+    if (maxTime) {
+      whereClause += 'time < ?';
+      params.push(Number(maxTime));
+    }
+  
+    if (maxDifficulty) {
+      if (whereClause) {
+        whereClause += ' AND ';
+      }
+      whereClause += 'difficulty < ?';
+      params.push(Number(maxDifficulty));
+    }
+  
+    const query = `SELECT * FROM recipes${whereClause ? ' WHERE ' + whereClause : ''}`;
+  
+    db.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error executing search query:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  
+      res.json(results);
+    });
+  });
+
 
 // Post a recipe
 router.post('/recipes', (req, res) => {

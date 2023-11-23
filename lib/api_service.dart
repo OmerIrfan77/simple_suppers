@@ -23,6 +23,25 @@ Future<List> fetchSingleRecipe(int id) async {
   }
 }
 
+Future<List<Map<String, dynamic>>> searchRecipes(
+    {int? maxTime, int? maxDifficulty}) async {
+  // Build the URL with the query parameters
+  final Uri uri = Uri.parse('$apiUrl/search').replace(queryParameters: {
+    'maxTime': maxTime?.toString(),
+    'maxDifficulty': maxDifficulty?.toString(),
+  });
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    final List<dynamic> responseData = json.decode(response.body);
+    // Convert the response data to a List<Map<String, dynamic>>
+    return List<Map<String, dynamic>>.from(responseData);
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
 // Fetch all the ingredients for a specific recipe
 Future<List> fetchIngredients(int recipeId) async {
   final response = await http

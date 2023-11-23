@@ -9,6 +9,21 @@ import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
+  test();
+}
+
+Future<void> test() async {
+  // Test the API calls
+  try {
+    final List<Map<String, dynamic>> searchResults = await searchRecipes(
+      maxTime: 30, // Replace with your desired maxTime
+      maxDifficulty: 3, // Replace with your desired maxDifficulty
+    );
+
+    print('Search Results: $searchResults');
+  } catch (e) {
+    print('Error: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -53,70 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Home Screen
-    Widget homeWidget = Center(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            FutureBuilder(
-              future: allRecipes(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Column(
-                    children: List.generate(
-                      snapshot.data!.length,
-                      (index) => RecipePreview(
-                        title: snapshot.data![index]['title'],
-                        shortDescription: snapshot.data![index]
-                            ['short_description'],
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => RecipeDetails(
-                                title: snapshot.data![index]['title'],
-                                recipeId: snapshot.data![index]['id'],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return Text('${snapshot.error}');
-                }
-                return const CircularProgressIndicator();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    Widget bodyWidget;
-    //TODO: add correct screens to each case
-    switch (currentIndex) {
-      case 0:
-        bodyWidget = homeWidget;
-        break;
-      case 1:
-        bodyWidget = const TestScreen();
-        break;
-      case 2:
-        bodyWidget = const Text('Search');
-        break;
-      case 3:
-        bodyWidget = const Text('Random');
-        break;
-      case 4:
-        bodyWidget = const Login(
-          title: '',
-        );
-        break;
-      default:
-        bodyWidget = homeWidget;
-    }
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 255, 249, 240),
       appBar: AppBar(
@@ -129,11 +80,46 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      body: bodyWidget,
-      bottomNavigationBar: CustomBottomNavigationBar(
-        onItemTap: (index) => onBottomBarTap(index),
-        currentIndex: currentIndex,
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              FutureBuilder(
+                future: allRecipes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: List.generate(
+                        snapshot.data!.length,
+                        (index) => RecipePreview(
+                          title: snapshot.data![index]['title'],
+                          shortDescription: snapshot.data![index]
+                              ['short_description'],
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RecipeDetails(
+                                  title: snapshot.data![index]['title'],
+                                  recipeId: snapshot.data![index]['id'],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  return const CircularProgressIndicator();
+                },
+              ),
+            ],
+          ),
+        ),
       ),
+      bottomNavigationBar: const CustomBottomNavigationBar(),
     );
   }
 }
