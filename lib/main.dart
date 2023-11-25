@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/login.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
@@ -37,8 +38,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   // List to hold the results from the API call
-  List<dynamic> data = [];
-  Future<List<dynamic>> allRecipes() async {
+  Future<List<Recipe>> allRecipes() async {
     return await fetchAllRecipes();
   }
 
@@ -56,44 +56,41 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              FutureBuilder(
-                future: allRecipes(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Column(
-                      children: List.generate(
-                        snapshot.data!.length,
-                        (index) => RecipePreview(
-                          title: snapshot.data![index]['title'],
-                          shortDescription: snapshot.data![index]
-                              ['short_description'],
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RecipeDetails(
-                                  title: snapshot.data![index]['title'],
-                                  recipeId: snapshot.data![index]['id'],
-                                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            FutureBuilder(
+              future: allRecipes(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Column(
+                    children: List.generate(
+                      snapshot.data!.length,
+                      (index) => RecipePreview(
+                        title: snapshot.data![index].title,
+                        shortDescription:
+                            snapshot.data![index].shortDescription,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecipeDetails(
+                                title: snapshot.data![index].title,
+                                recipeId: snapshot.data![index].id,
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Text('${snapshot.error}');
-                  }
-                  return const CircularProgressIndicator();
-                },
-              ),
-            ],
-          ),
-
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Text('${snapshot.error}');
+                }
+                return const CircularProgressIndicator();
+              },
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(),
