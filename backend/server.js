@@ -31,8 +31,12 @@ const db = mysql.createPool({
   });
 
 // Routes
+
 const recipesRoutes = require('./routes/routes');
+const recipeIngredientsRoutes = require('./routes/recipe_ingredients');
+
 app.use('/api', recipesRoutes);
+app.use('/api', recipeIngredientsRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

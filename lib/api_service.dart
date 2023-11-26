@@ -23,6 +23,18 @@ Future<List> fetchSingleRecipe(int id) async {
   }
 }
 
+// Fetch all the ingredients for a specific recipe
+Future<List> fetchIngredients(int recipeId) async {
+  final response = await http
+      .get(Uri.parse('http://localhost:3000/api/recipe_ingredients/$recipeId'));
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+    return responseData;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
 Future<void> addRecipe({
   required String instructions,
   required int difficulty,
