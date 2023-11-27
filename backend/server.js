@@ -31,7 +31,7 @@ const db = mysql.createPool({
   });
 
 // Routes
-const recipesRoutes = require('./routes/recipes');
+const recipesRoutes = require('./routes/routes');
 const recipeIngredientsRoutes = require('./routes/recipe_ingredients');
 
 app.use('/api', recipesRoutes);

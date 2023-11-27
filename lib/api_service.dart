@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const apiUrl = 'http://localhost:3000/api/recipes';
+const apiUrl = 'http://localhost:3000/api';
 
 Future<List> fetchAllRecipes() async {
-  final response = await http.get(Uri.parse(apiUrl));
+  final response = await http.get(Uri.parse('$apiUrl/recipes'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -14,7 +14,7 @@ Future<List> fetchAllRecipes() async {
 }
 
 Future<List> fetchSingleRecipe(int id) async {
-  final response = await http.get(Uri.parse('$apiUrl/$id'));
+  final response = await http.get(Uri.parse('$apiUrl/recipe/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -26,10 +26,12 @@ Future<List> fetchSingleRecipe(int id) async {
 Future<List<Map<String, dynamic>>> searchRecipes(
     {int? maxTime, int? maxDifficulty}) async {
   // Build the URL with the query parameters
-  final Uri uri = Uri.parse('$apiUrl/search').replace(queryParameters: {
-    'maxTime': maxTime?.toString(),
-    'maxDifficulty': maxDifficulty?.toString(),
+  final Uri uri = Uri.parse('$apiUrl/recipes/search').replace(queryParameters: {
+    'time': maxTime?.toString(),
+    'difficulty': maxDifficulty?.toString(),
   });
+
+  print('Search URL: $uri');
 
   final response = await http.get(uri);
 
@@ -44,8 +46,8 @@ Future<List<Map<String, dynamic>>> searchRecipes(
 
 // Fetch all the ingredients for a specific recipe
 Future<List> fetchIngredients(int recipeId) async {
-  final response = await http
-      .get(Uri.parse('http://localhost:3000/api/recipe_ingredients/$recipeId'));
+  final response =
+      await http.get(Uri.parse('$apiUrl/recipe_ingredients/$recipeId'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -99,7 +101,7 @@ Future<void> addRecipe({
 
   try {
     final http.Response response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse('$apiUrl/recipes'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
