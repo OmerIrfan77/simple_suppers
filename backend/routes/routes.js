@@ -3,6 +3,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 // Define routes
 
 // Get all recipes
@@ -19,7 +22,7 @@ router.get('/recipes', (req, res) => {
 });
 
 // Get a single recipe
-router.get('/recipes/:id', (req, res) => {
+router.get('/recipe/:id', (req, res) => {
     const db = require('../server').db;
     const id = req.params.id;
     db.query('SELECT * FROM recipes WHERE id = ?', [id], (error, results) => {
@@ -31,45 +34,6 @@ router.get('/recipes/:id', (req, res) => {
         }
     });
 });
-
-router.get('/recipes/search', (req, res) => {
-    const db = require('../server').db;
-    const { maxTime, maxDifficulty } = req.query;
-  
-    // Check if at least one parameter is provided
-    if (!maxTime && !maxDifficulty) {
-      return res.status(400).json({ error: 'At least one parameter (maxTime or maxDifficulty) is required' });
-    }
-  
-    // Build the WHERE clause based on provided parameters
-    let whereClause = '';
-    let params = [];
-  
-    if (maxTime) {
-      whereClause += 'time < ?';
-      params.push(Number(maxTime));
-    }
-  
-    if (maxDifficulty) {
-      if (whereClause) {
-        whereClause += ' AND ';
-      }
-      whereClause += 'difficulty < ?';
-      params.push(Number(maxDifficulty));
-    }
-  
-    const query = `SELECT * FROM recipes${whereClause ? ' WHERE ' + whereClause : ''}`;
-  
-    db.query(query, params, (error, results) => {
-      if (error) {
-        console.error('Error executing search query:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-  
-      res.json(results);
-    });
-  });
-
 
 // Post a recipe
 router.post('/recipes', (req, res) => {
@@ -134,25 +98,42 @@ router.post('/recipes', (req, res) => {
 // Search recipes by difficulty
 router.get('/recipes/search', (req, res) => {
     const db = require('../server').db;
-    const difficulty = req.query.difficulty; // Assuming you pass the difficulty as a query parameter
-
-    if (!difficulty) {
-        return res.status(400).json({ error: 'Difficulty parameter is required' });
+    const { time, difficulty } = req.query;
+  
+    // Check if at least one parameter is provided
+    if (!time && !difficulty) {
+      return res.status(400).json({ error: 'At least one parameter (time or difficulty) is required' });
     }
-
-    const sql = 'SELECT * FROM recipes WHERE difficulty = ?';
-    const values = [difficulty];
-
-    db.query(sql, values, (error, results) => {
-        if (error) {
-            console.error('Error executing query:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json(results);
-        }
+  
+    // Build the WHERE clause based on provided parameters
+    let whereClause = '';
+    let params = [];
+  
+    if (time) {
+      whereClause += 'time <= ?';
+      params.push(Number(time));
+    }
+  
+    if (difficulty) {
+      if (whereClause) {
+        whereClause += ' AND ';
+      }
+      whereClause += 'difficulty <= ?';
+      params.push(Number(difficulty));
+    }
+  
+    const query = `SELECT * FROM recipes${whereClause ? ' WHERE ' + whereClause : ''}`;
+  
+    db.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error executing search query:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  
+      res.json(results);
     });
-});
-
+  });
+  
 
 // USER RELATED ROUTES
 
