@@ -7,15 +7,15 @@ import '../api_service.dart';
 
 class RecipeDetails extends StatefulWidget {
   final int recipeId;
-  const RecipeDetails(
-      {super.key, required String title, required this.recipeId});
+  const RecipeDetails({Key? key, required String title, required this.recipeId})
+      : super(key: key);
 
   @override
   State<RecipeDetails> createState() => _RecipeDetailsState();
 }
 
 class _RecipeDetailsState extends State<RecipeDetails> {
-  late List recipe; // The recipe data
+  late List recipe = []; // The recipe data
   int recipeId = 1; // The recipe index to fetch
 
   @override
