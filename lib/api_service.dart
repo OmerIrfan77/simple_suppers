@@ -1,23 +1,26 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:simple_suppers/models/recipe.dart';
 
 const String apiUrl = 'http://localhost:3000/api/recipes';
-
-Future<List> fetchAllRecipes() async {
+Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse(apiUrl));
   if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    return responseData;
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
 }
 
-Future<List> fetchSingleRecipe(int id) async {
+Future<Recipe> fetchSingleRecipe(int id) async {
   final response = await http.get(Uri.parse('$apiUrl/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
-    return responseData;
+    return Recipe.transform(responseData[0]);
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }

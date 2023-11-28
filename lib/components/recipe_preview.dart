@@ -5,11 +5,13 @@ class RecipePreview extends StatelessWidget {
   final void Function() onTap;
   final String title;
   final String? shortDescription;
+  final String? imageLink;
   const RecipePreview(
       {super.key,
       required this.onTap,
       required this.title,
-      this.shortDescription});
+      this.shortDescription,
+      this.imageLink});
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +39,14 @@ class RecipePreview extends StatelessWidget {
                   Container(
                     width: 140.0,
                     height: 100.0,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(10.0),
                         bottomRight: Radius.circular(5.0),
                       ),
                       image: DecorationImage(
-                        image: NetworkImage('https://picsum.photos/200'),
+                        image: NetworkImage(
+                            imageLink ?? 'https://picsum.photos/200'),
                         fit: BoxFit.cover,
                       ),
                     ),
