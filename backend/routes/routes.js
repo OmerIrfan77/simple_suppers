@@ -8,7 +8,6 @@ const jwt = require("jsonwebtoken");
 // Get all recipes
 router.get("/recipes", (req, res) => {
   const db = require("../server").db;
-  console.log("DB: ", db);
   db.query("SELECT * FROM recipes", (error, results) => {
     if (error) {
       console.error("Error executing query:", error);
