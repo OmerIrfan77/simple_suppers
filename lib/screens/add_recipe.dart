@@ -75,36 +75,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                             ),
                     ],
                   ),
-                  // Image URL
-                  // if (imageUrlController.text.isEmpty)
-                  //   TextFormField(
-                  //     controller: imageUrlController,
-                  //     decoration: const InputDecoration(labelText: 'Image URL'),
-                  //     onChanged: (value) {
-                  //       // Dynamically update the image preview as the user types
-                  //       setState(() {});
-                  //     },
-                  //   ),
-                  // const SizedBox(height: 8.0),
-                  // // Button to open the pop-up window for adding image URL
-                  // ElevatedButton(
-                  //   onPressed: () => _showAddImageUrlDialog(context),
-                  //   child: const Text('Add Image URL'),
-                  // ),
-                  // const SizedBox(height: 16.0),
-                  // // Image preview
-                  // if (imageUrlController.text.isNotEmpty)
-                  //   Container(
-                  //     constraints: const BoxConstraints(
-                  //         maxHeight: 200.0, maxWidth: 200.0),
-                  //     child: Image.network(
-                  //       imageUrlController.text,
-                  //       height: 200.0,
-                  //       width: 300.0,
-                  //       fit: BoxFit.cover,
-                  //     ),
-                  //   ),
-                  // // const SizedBox(height: 16.0),
                   // Title
                   TextFormField(
                     controller: titleController,
