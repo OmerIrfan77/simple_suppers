@@ -67,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     (index) => RecipePreview(
                       title: snapshot.data![index].title,
                       shortDescription: snapshot.data![index].shortDescription,
+                      imageLink: snapshot.data![index].imageLink,
                       onTap: () {
                         Navigator.push(
                           context,

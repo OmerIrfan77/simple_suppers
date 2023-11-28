@@ -51,7 +51,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                 children: [
                   // Stack text on picture
                   Stack(children: [
-                    Image.network(
+                    Image.network(recipe.imageLink ??
                         'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg'),
                     Positioned(
                         bottom: 10,
