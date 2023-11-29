@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/recipe.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiUrl = 'http://localhost:3000/api/recipes';
+const String apiUrl = 'http://localhost:3000/api';
+
 Future<List<Recipe>> fetchAllRecipes() async {
-  final response = await http.get(Uri.parse(apiUrl));
+  final response = await http.get(Uri.parse('$apiUrl/recipes'));
   if (response.statusCode == 200) {
     List<Recipe> recipes = [];
     for (var recipe in json.decode(response.body)) {
@@ -17,7 +19,7 @@ Future<List<Recipe>> fetchAllRecipes() async {
 }
 
 Future<Recipe> fetchSingleRecipe(int id) async {
-  final response = await http.get(Uri.parse('$apiUrl/$id'));
+  final response = await http.get(Uri.parse('$apiUrl/recipe/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return Recipe.transform(responseData[0]);
@@ -28,8 +30,8 @@ Future<Recipe> fetchSingleRecipe(int id) async {
 
 // Fetch all the ingredients for a specific recipe
 Future<List> fetchIngredients(int recipeId) async {
-  final response = await http
-      .get(Uri.parse('http://localhost:3000/api/recipe_ingredients/$recipeId'));
+  final response =
+      await http.get(Uri.parse('$apiUrl/recipe_ingredients/$recipeId'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -83,7 +85,7 @@ Future<void> addRecipe({
 
   try {
     final http.Response response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse('$apiUrl/recipes'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -104,26 +106,12 @@ Future<void> addRecipe({
   }
 }
 
-// Search function for searching all recipes that match a difficulty level
-Future<List> searchRecipeDifficulty(int difficulty) async {
-  final response =
-      await http.get(Uri.parse('$apiUrl/search?difficulty=$difficulty'));
-  if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    return responseData;
-  } else {
-    throw Exception('API Error: ${response.statusCode}');
-  }
-}
-
 // User authentication functions //
 
 class AuthService {
-  final String baseUrl = 'http://localhost:3000/api';
-
   Future register(String username, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/register'),
+      Uri.parse('$apiUrl/register'),
       body: jsonEncode({'username': username, 'password': password}),
       headers: {'Content-Type': 'application/json'},
     );
@@ -133,20 +121,40 @@ class AuthService {
 
   Future login(String username, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/login'),
+      Uri.parse('$apiUrl/login'),
       body: jsonEncode({'username': username, 'password': password}),
       headers: {'Content-Type': 'application/json'},
+    );
+
+    final responseData = jsonDecode(response.body);
+
+    if (response.statusCode == 200 && responseData.containsKey('token')) {
+      // Store the token in shared preferences
+      await _saveToken(responseData['token']);
+    }
+
+    return responseData;
+  }
+
+  Future logout() async {
+    await _removeToken();
+
+    final response = await http.post(
+      Uri.parse('$apiUrl/logout'),
+      headers: {'Authorization': 'Bearer yourToken'},
     );
 
     return jsonDecode(response.body);
   }
 
-  Future logout() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/logout'),
-      headers: {'Authorization': 'Bearer yourToken'},
-    );
+  Future<void> _saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
+  }
 
-    return jsonDecode(response.body);
+  // Private method to remove the token from shared preferences
+  Future<void> _removeToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
   }
 }
