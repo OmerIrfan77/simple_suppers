@@ -143,7 +143,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
       ),
-      bottomNavigationBar: const CustomBottomNavigationBar(),
+      body: bodyWidget,
+      bottomNavigationBar: CustomBottomNavigationBar(
+        onItemTap: (index) => onBottomBarTap(index),
+        currentIndex: currentIndex,
+      ),
     );
   }
 }

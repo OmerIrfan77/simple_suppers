@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/recipe.dart';
 
 const String apiUrl = 'http://localhost:3000/api/recipes';
+
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse(apiUrl));
   if (response.statusCode == 200) {
@@ -20,7 +21,7 @@ Future<Recipe> fetchSingleRecipe(int id) async {
   final response = await http.get(Uri.parse('$apiUrl/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
-    return responseData;
+    return Recipe.transform(responseData[0]);
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
@@ -29,7 +30,7 @@ Future<Recipe> fetchSingleRecipe(int id) async {
 Future<List<Map<String, dynamic>>> searchRecipes(
     {int? maxTime, int? maxDifficulty}) async {
   // Build the URL with the query parameters
-  final Uri uri = Uri.parse('$apiUrl/recipes/search').replace(queryParameters: {
+  final Uri uri = Uri.parse('$apiUrl/search').replace(queryParameters: {
     'time': maxTime?.toString(),
     'difficulty': maxDifficulty?.toString(),
   });
