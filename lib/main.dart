@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => RecipeDetails(
-                                title: snapshot.data![index]['title'],
+                                // title: snapshot.data![index]['title'],
                                 recipeId: snapshot.data![index]['id'],
                               ),
                             ),

@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:simple_suppers/api_service.dart' show addRecipe;
+import 'package:simple_suppers/screens/recipe_details.dart';
 
 class RecipeFormPage extends StatefulWidget {
   const RecipeFormPage({super.key});
@@ -23,7 +24,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   List<String> steps = [];
   List<String> publicList = <String>['Yes', 'No'];
   String publicDropdownValue = "Yes";
-  var difficultyList = [1, 2, 3, 4, 5];
+  var difficultyList = [1, 2, 3];
   int difficultyDropdownValue = 1;
 
   @override
@@ -97,16 +98,16 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                           controller: timeController,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
-                              hintText: 'hh:mm', labelText: 'Estimated Time'),
+                              hintText: 'mins', labelText: 'Estimated Time'),
                         ),
                       ),
                       const SizedBox(width: 16.0),
                       Expanded(
                         child: TextFormField(
                           controller: budgetController,
-                          keyboardType: TextInputType.number,
-                          decoration:
-                              const InputDecoration(labelText: 'Budget (SEK)'),
+                          keyboardType: TextInputType.text,
+                          decoration: const InputDecoration(
+                              labelText: 'Budget', hintText: '(e.g. cheap)'),
                         ),
                       ),
                     ],
@@ -225,7 +226,34 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                   ElevatedButton(
                     onPressed: () async {
                       // Implement logic to send recipe data to the database
-                      await addRecipe();
+                      int result = await addRecipe(
+                          instructions: steps.join(";"),
+                          difficulty:
+                              int.tryParse(difficultyController.text) ?? 1,
+                          time: int.tryParse(timeController.text) ?? 0,
+                          budget: budgetController.text,
+                          creatorId: 1,
+                          title: titleController.text,
+                          shortDescription: descriptionController.text,
+                          isPublic: publicDropdownValue.toLowerCase() == 'yes'
+                              ? 1
+                              : 0,
+                          rating: 5,
+                          imageLink: imageUrlController.text);
+                      if (result != 0) {
+                        if (context.mounted) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    RecipeDetails(recipeId: result),
+                              ));
+                        } else {
+                          const SnackBar(
+                            content: Text('Failed to add recipe!'),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
@@ -280,74 +308,5 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
         );
       },
     );
-  }
-
-  Future<void> addRecipe() async {
-    String instructions = steps.join(";");
-    int difficulty = int.tryParse(difficultyController.text) ?? 0;
-    int time = int.tryParse(timeController.text) ?? 0;
-    String budget = budgetController.text;
-    int creatorId = 10;
-    String title = titleController.text;
-    String shortDescription = descriptionController.text;
-    int isPublic = publicDropdownValue.toLowerCase() == 'yes' ? 1 : 0;
-    int rating = 5;
-    String imageLink = imageUrlController.text;
-
-    // Validate input values
-    if (instructions.isEmpty ||
-        difficulty < 1 ||
-        difficulty > 3 ||
-        time <= 0 ||
-        budget.isEmpty ||
-        creatorId <= 0 ||
-        title.isEmpty ||
-        shortDescription.isEmpty ||
-        (isPublic != 0 && isPublic != 1) ||
-        rating < 1 ||
-        rating > 5 ||
-        imageLink.isEmpty) {
-      print('Invalid input values. Please check and try again.');
-      return;
-    }
-
-    const String apiUrl =
-        'http://localhost:3000/api/recipes'; // Replace with your actual API URL
-
-    // Data to be sent in the request body
-    final Map<String, dynamic> data = {
-      'instructions': instructions,
-      'difficulty': difficulty,
-      'time': time,
-      'budget': budget,
-      'creator_id': creatorId,
-      'title': title,
-      'short_description': shortDescription,
-      'is_public': isPublic,
-      'rating': rating,
-      'image_link': imageLink,
-    };
-
-    try {
-      final http.Response response = await http.post(
-        Uri.parse(apiUrl),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data),
-      );
-
-      if (response.statusCode == 200) {
-        // Recipe added successfully
-        print('Recipe added successfully');
-        print('Response data: ${response.body}');
-      } else {
-        // Error adding recipe
-        print('Failed to add recipe. Error: ${response.reasonPhrase}');
-      }
-    } catch (error) {
-      // Handle network errors
-      print('Error sending POST request: $error');
-    }
   }
 }
