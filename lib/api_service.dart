@@ -1,23 +1,48 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://10.0.2.2:3000/api/recipes';
+const String apiUrl = 'http://localhost:3000/api';
 
-Future<List> fetchAllRecipes() async {
-  final response = await http.get(Uri.parse(apiUrl));
+Future<List<Recipe>> fetchAllRecipes() async {
+  final response = await http.get(Uri.parse('$apiUrl/recipes'));
   if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    return responseData;
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
 }
 
-Future<List> fetchSingleRecipe(int id) async {
-  final response = await http.get(Uri.parse('$apiUrl/$id'));
+Future<Recipe> fetchSingleRecipe(int id) async {
+  final response = await http.get(Uri.parse('$apiUrl/recipe/$id'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
-    return responseData;
+    return Recipe.transform(responseData[0]);
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
+Future<List<Map<String, dynamic>>> searchRecipes(
+    {int? maxTime, int? maxDifficulty}) async {
+  // Build the URL with the query parameters
+  final Uri uri = Uri.parse('$apiUrl/recipes/search').replace(queryParameters: {
+    'time': maxTime?.toString(),
+    'difficulty': maxDifficulty?.toString(),
+  });
+
+  print('Search URL: $uri');
+
+  final response = await http.get(uri);
+
+  if (response.statusCode == 200) {
+    final List<dynamic> responseData = json.decode(response.body);
+    // Convert the response data to a List<Map<String, dynamic>>
+    return List<Map<String, dynamic>>.from(responseData);
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
@@ -25,8 +50,8 @@ Future<List> fetchSingleRecipe(int id) async {
 
 // Fetch all the ingredients for a specific recipe
 Future<List> fetchIngredients(int recipeId) async {
-  final response = await http
-      .get(Uri.parse('http://10.0.2.2:3000/api/recipe_ingredients/$recipeId'));
+  final response =
+      await http.get(Uri.parse('$apiUrl/recipe_ingredients/$recipeId'));
   if (response.statusCode == 200) {
     final responseData = json.decode(response.body);
     return responseData;
@@ -80,7 +105,7 @@ Future<int> addRecipe({
 
   try {
     final http.Response response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse('$apiUrl/recipes'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -101,19 +126,6 @@ Future<int> addRecipe({
   } catch (error) {
     // Handle network errors
     print('Error sending POST request: $error');
-  }
-  return 0;
-}
-
-// Search function for searching all recipes that match a difficulty level
-Future<List> searchRecipeDifficulty(int difficulty) async {
-  final response =
-      await http.get(Uri.parse('$apiUrl/search?difficulty=$difficulty'));
-  if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    return responseData;
-  } else {
-    throw Exception('API Error: ${response.statusCode}');
   }
 }
 
