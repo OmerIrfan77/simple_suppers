@@ -4,7 +4,6 @@ import 'package:simple_suppers/screens/login.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/bottom_bar.dart';
-import 'package:simple_suppers/screens/test_screen.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
 // import the 'api_service.dart' file from backend folder
 import 'api_service.dart';
@@ -89,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => RecipeDetails(
-                              title: snapshot.data![index].title,
+                              // title: snapshot.data![index].title,
                               recipeId: snapshot.data![index].id,
                             ),
                           ),

@@ -240,8 +240,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                               : 0,
                           rating: 5,
                           imageLink: imageUrlController.text);
-                      if (result != 0) {
-                        if (context.mounted) {
+                      if (mounted) {
+                        if (result != 0) {
+                          // if (context.mounted) {
                           Navigator.push(
                               context,
                               MaterialPageRoute(

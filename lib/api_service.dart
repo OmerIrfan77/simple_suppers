@@ -127,12 +127,13 @@ Future<int> addRecipe({
     // Handle network errors
     print('Error sending POST request: $error');
   }
+  return 0;
 }
 
 // User authentication functions //
 
 class AuthService {
-  final String baseUrl = 'http://10.0.2.2:3000/api';
+  final String baseUrl = 'http://localhost:3000/api';
 
   Future register(String username, String password) async {
     final response = await http.post(
