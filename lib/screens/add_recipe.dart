@@ -226,7 +226,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                   ElevatedButton(
                     onPressed: () async {
                       // Implement logic to send recipe data to the database
-                      int result = await addRecipe(
+                      int? result = await addRecipe(
                           instructions: steps.join(";"),
                           difficulty:
                               int.tryParse(difficultyController.text) ?? 1,
@@ -241,7 +241,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                           rating: 5,
                           imageLink: imageUrlController.text);
                       if (mounted) {
-                        if (result != 0) {
+                        if (result != null) {
                           // if (context.mounted) {
                           Navigator.push(
                               context,
