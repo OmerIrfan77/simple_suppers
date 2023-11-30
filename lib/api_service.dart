@@ -60,7 +60,7 @@ Future<List> fetchIngredients(int recipeId) async {
   }
 }
 
-Future<int> addRecipe({
+Future<int?> addRecipe({
   required String instructions,
   required int difficulty,
   required int time,
@@ -86,7 +86,6 @@ Future<int> addRecipe({
       rating > 5 ||
       imageLink.isEmpty) {
     print('Invalid input values. Please check and try again.');
-    return 0;
   }
 
   // Data to be sent in the request body
@@ -121,13 +120,12 @@ Future<int> addRecipe({
     } else {
       // Error adding recipe
       print('Failed to add recipe. Error: ${response.reasonPhrase}');
-      return 0;
     }
   } catch (error) {
     // Handle network errors
     print('Error sending POST request: $error');
   }
-  return 0;
+  return null;
 }
 
 // User authentication functions //
