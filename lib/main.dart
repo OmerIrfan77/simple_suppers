@@ -11,13 +11,20 @@ import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
-  testLogin('pontus', 'passwohrd');
+  testLogin('pontus', 'password');
+  testLogout();
 }
 
 void testLogin(String username, String password) async {
   await AuthService().login(username, password);
-  final username = await AuthService.getUsername();
-  print(username);
+  final user = await AuthService.getUsername();
+  print('Logged in user: $user');
+}
+
+void testLogout() async {
+  await AuthService().logout();
+  final user = await AuthService.getUsername();
+  print('Logged in user: $user');
 }
 
 class MyApp extends StatelessWidget {

@@ -152,7 +152,7 @@ class AuthService {
     if (response.statusCode == 200) {
       // If the response is good, meaning the password is correct,
       // store the logged in username in the AuthService class
-      _username = username;
+      _username = jsonDecode(response.body)["username"];
     } else {
       // If the response is bad, clear the stored username
       _username = null;
