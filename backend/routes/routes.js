@@ -3,6 +3,8 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const secretKey = process.env.JWT_SECRET_KEY
+
 // Define routes
 
 // Get all recipes
@@ -170,7 +172,7 @@ router.post("/login", async (req, res) => {
         const match = await bcrypt.compare(password, results[0].password);
 
         if (match) {
-          const token = jwt.sign({ username }, "your_secret_key", {
+          const token = jwt.sign({ username }, secretKey, {
             expiresIn: "1h",
           });
           res.json({ token });

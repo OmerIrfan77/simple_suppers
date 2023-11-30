@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/recipe.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 const String apiUrl = 'http://localhost:3000/api';
 
@@ -130,6 +129,8 @@ Future<void> addRecipe({
 // User authentication functions //
 
 class AuthService {
+  static String? _username;
+
   Future register(String username, String password) async {
     final response = await http.post(
       Uri.parse('$apiUrl/register'),
@@ -149,33 +150,24 @@ class AuthService {
 
     final responseData = jsonDecode(response.body);
 
-    if (response.statusCode == 200 && responseData.containsKey('token')) {
+    if (response.statusCode == 200) {
       // Store the token in shared preferences
-      await _saveToken(responseData['token']);
+      _username = username;
     }
 
-    return responseData;
+    return _username;
   }
 
   Future logout() async {
-    await _removeToken();
-
+    _username = null;
     final response = await http.post(
       Uri.parse('$apiUrl/logout'),
-      headers: {'Authorization': 'Bearer yourToken'},
     );
 
     return jsonDecode(response.body);
   }
 
-  Future<void> _saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-  }
-
-  // Private method to remove the token from shared preferences
-  Future<void> _removeToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
+  static Future<String?> getUsername() async {
+    return _username;
   }
 }
