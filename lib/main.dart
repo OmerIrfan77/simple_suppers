@@ -16,8 +16,8 @@ void main() {
 
 void testLogin(String username, String password) async {
   await AuthService().login(username, password);
-  final token = await AuthService.getUsername();
-  print(token);
+  final username = await AuthService.getUsername();
+  print(username);
 }
 
 class MyApp extends StatelessWidget {

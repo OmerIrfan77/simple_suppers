@@ -129,6 +129,7 @@ Future<void> addRecipe({
 // User authentication functions //
 
 class AuthService {
+  // Variable for storing the logged in username
   static String? _username;
 
   Future register(String username, String password) async {
@@ -148,17 +149,20 @@ class AuthService {
       headers: {'Content-Type': 'application/json'},
     );
 
-    final responseData = jsonDecode(response.body);
-
     if (response.statusCode == 200) {
-      // Store the token in shared preferences
+      // If the response is good, meaning the password is correct,
+      // store the logged in username in the AuthService class
       _username = username;
+    } else {
+      // If the response is bad, clear the stored username
+      _username = null;
     }
 
     return _username;
   }
 
   Future logout() async {
+    // Clear the stored username
     _username = null;
     final response = await http.post(
       Uri.parse('$apiUrl/logout'),
@@ -168,6 +172,7 @@ class AuthService {
   }
 
   static Future<String?> getUsername() async {
+    // Return the stored username
     return _username;
   }
 }
