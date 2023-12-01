@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/components/labels.dart';
 import 'package:simple_suppers/models/recipe.dart';
+import 'package:simple_suppers/main.dart' show MyHomePage;
 import '../api_service.dart';
 
 // Display detailed view of a recipe, i.e. picture, description,
@@ -8,8 +9,7 @@ import '../api_service.dart';
 
 class RecipeDetails extends StatefulWidget {
   final int recipeId;
-  const RecipeDetails({Key? key, required String title, required this.recipeId})
-      : super(key: key);
+  const RecipeDetails({Key? key, required this.recipeId}) : super(key: key);
 
   @override
   State<RecipeDetails> createState() => _RecipeDetailsState();
@@ -25,7 +25,20 @@ class _RecipeDetailsState extends State<RecipeDetails> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        leading: const BackButton(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      const MyHomePage(title: 'SimpleSuppers')),
+            );
+          },
+        ),
         title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -131,7 +144,20 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 15.0),
-                    child: Text(recipe.instructions),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (int i = 0;
+                            i < recipe.instructions.split(';').length;
+                            i++)
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 8.0),
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                                'Step${i + 1}. ${recipe.instructions.split(';')[i]}'),
+                          ),
+                      ],
+                    ),
                   ),
                 ],
               )),
