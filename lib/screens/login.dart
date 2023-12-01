@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/api_service.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key, required String title});
@@ -57,6 +58,8 @@ class LoginFormState extends State<LoginForm> {
   // Note: This is a `GlobalKey<FormState>`,
   // not a GlobalKey<MyCustomFormState>.
   final _formKey = GlobalKey<FormState>();
+  String? _email;
+  String? _password;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +98,9 @@ class LoginFormState extends State<LoginForm> {
                 }
                 return null;
               },
+              onSaved: (value) {
+                _email = value;
+              },
             ),
           ),
           Container(
@@ -127,6 +133,9 @@ class LoginFormState extends State<LoginForm> {
                 }
                 return null;
               },
+              onSaved: (value) {
+                _password = value;
+              },
             ),
           ),
           Container(
@@ -140,14 +149,12 @@ class LoginFormState extends State<LoginForm> {
           Padding(
             padding: const EdgeInsets.only(top: 75),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
-                  // If the form is valid, display a snackbar. In the real world,
-                  // you'd often call a server or save the information in a database.
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Loggin in . . .')),
-                  );
+                  _formKey.currentState!
+                      .save(); // This triggers onSaved for each field
+                  await AuthService().login(_email!, _password!);
                 }
               },
               style: ElevatedButton.styleFrom(

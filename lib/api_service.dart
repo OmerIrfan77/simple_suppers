@@ -157,18 +157,14 @@ class AuthService {
       // If the response is bad, clear the stored username
       _username = null;
     }
-
+    print('Logged in user (after login): $_username');
     return _username;
   }
 
   Future logout() async {
     // Clear the stored username
     _username = null;
-    final response = await http.post(
-      Uri.parse('$apiUrl/logout'),
-    );
-
-    return jsonDecode(response.body);
+    return null;
   }
 
   static Future<String?> getUsername() async {
