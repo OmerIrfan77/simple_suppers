@@ -10,21 +10,20 @@ import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
-  test();
+  testLogin('pontus', 'password');
+  testLogout();
 }
 
-Future<void> test() async {
-  // Test the API calls
-  try {
-    final List<Map<String, dynamic>> searchResults = await searchRecipes(
-      //maxTime: 20, // Replace with your desired maxTime
-      maxDifficulty: 3, // Replace with your desired maxDifficulty
-    );
+void testLogin(String username, String password) async {
+  await AuthService().login(username, password);
+  final user = await AuthService.getUsername();
+  print('Logged in user: $user');
+}
 
-    print('Search Results: $searchResults');
-  } catch (e) {
-    print('Error (test): $e');
-  }
+void testLogout() async {
+  await AuthService().logout();
+  final user = await AuthService.getUsername();
+  print('Logged in user: $user');
 }
 
 class MyApp extends StatelessWidget {

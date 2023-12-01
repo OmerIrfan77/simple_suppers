@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+
+const secretKey = process.env.JWT_SECRET_KEY
 
 // Define routes
 
@@ -156,6 +157,7 @@ router.post("/register", async (req, res) => {
 
 //User login
 router.post("/login", async (req, res) => {
+  const db = require("../server").db;
   const { username, password } = req.body;
 
   db.query(
@@ -167,12 +169,9 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
       } else if (results.length > 0) {
         const match = await bcrypt.compare(password, results[0].password);
-
+        
         if (match) {
-          const token = jwt.sign({ username }, "your_secret_key", {
-            expiresIn: "1h",
-          });
-          res.json({ token });
+          res.json({ username: results[0].username });
         } else {
           res.status(401).json({ error: "Invalid credentials" });
         }
