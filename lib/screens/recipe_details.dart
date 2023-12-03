@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/components/labels.dart';
+import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/main.dart' show MyHomePage;
 import '../api_service.dart';
@@ -18,6 +19,10 @@ class RecipeDetails extends StatefulWidget {
 class _RecipeDetailsState extends State<RecipeDetails> {
   Future<Recipe> singleRecipe() async {
     return await fetchSingleRecipe(widget.recipeId);
+  }
+
+  Future<List<Ingredient>> ingredients() async {
+    return await fetchIngredients(widget.recipeId);
   }
 
   @override
@@ -61,7 +66,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
             return ListView(children: [
               (Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
+                children: <Widget>[
                   // Stack text on picture
                   Stack(children: [
                     Image.network(recipe.imageLink ??
@@ -120,15 +125,39 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       ),
                     ),
                   ),
-                  // TODO: add ingredients here
-                  // ListView.builder(
-                  //   padding: const EdgeInsets.only(left: 15.0),
-                  //   shrinkWrap: true,
-                  //   itemCount: ingredients.length,
-                  //   itemBuilder: (context, index) {
-                  //     return Text('${ingredient[index].name}');
-                  //   },
-                  // ),
+                  FutureBuilder<List<Ingredient>>(
+                    future: ingredients(),
+                    builder: (context, ingredientSnapshot) {
+                      if (ingredientSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        // If the Future is still running, show a loading indicator
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (ingredientSnapshot.hasError) {
+                        // If an error occurred, display an error message
+                        return Text('Error: ${ingredientSnapshot.error}');
+                      } else {
+                        final ingredientList = ingredientSnapshot.data;
+
+                        if (ingredientList!.isEmpty) {
+                          return const Center(
+                              child: Text('Ingredients not found'));
+                        }
+
+                        return ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: ingredientList.length,
+                            itemBuilder: (context, index) {
+                              final ingredient = ingredientList[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(left: 15.0),
+                                child: Container(
+                                    child: Text(
+                                        '${ingredient.quantity} ${ingredient.quantityType} ${ingredient.name}')),
+                              );
+                            });
+                      }
+                    },
+                  ),
                   const Padding(
                     padding: EdgeInsets.all(15.0),
                     child: Align(
@@ -154,7 +183,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             margin: const EdgeInsets.symmetric(vertical: 8.0),
                             alignment: Alignment.centerLeft,
                             child: Text(
-                                'Step${i + 1}. ${recipe.instructions.split(';')[i]}'),
+                                '${i + 1}. ${recipe.instructions.split(';')[i]}'),
                           ),
                       ],
                     ),
