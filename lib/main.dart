@@ -5,6 +5,7 @@ import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/bottom_bar.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
+import 'package:simple_suppers/search_filter_bottom_sheet.dart';
 // import the 'api_service.dart' file from backend folder
 import 'api_service.dart';
 
@@ -63,6 +64,15 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       currentIndex = index;
     });
+    if (currentIndex == 2) {
+      showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SearchFilterBottomSheet();
+          },
+      );
+      
+    }
   }
 
   @override
@@ -114,9 +124,6 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       case 1:
         bodyWidget = const RecipeFormPage();
-        break;
-      case 2:
-        bodyWidget = const Text('Search');
         break;
       case 3:
         bodyWidget = const Text('Random');
