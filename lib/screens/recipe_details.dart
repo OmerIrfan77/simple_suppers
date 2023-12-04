@@ -30,20 +30,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      const MyHomePage(title: 'SimpleSuppers')),
-            );
-          },
-        ),
+        leading: const BackButton(color: Colors.white),
         title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
