@@ -90,6 +90,7 @@ Future<int?> addRecipe({
       rating > 5 ||
       imageLink.isEmpty) {
     print('Invalid input values. Please check and try again.');
+    return null;
   }
 
   // Data to be sent in the request body
