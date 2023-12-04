@@ -2,34 +2,117 @@ import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
 
 class Login extends StatelessWidget {
-  const Login({super.key, required String title});
+  Login({super.key, required String title});
+  final AuthService auth = AuthService();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      // Use your authentication service or method to check if the user is logged in.
+      future: auth.isLoggedIn(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          // If the user is logged in, show a different widget.
+          if (snapshot.data == true) {
+            return FutureBuilder<String?>(
+              // Use your authentication service or method to get the username.
+              future: auth.getUsername(),
+              builder: (context, usernameSnapshot) {
+                if (usernameSnapshot.connectionState == ConnectionState.done) {
+                  final loggedInUser = usernameSnapshot.data;
+                  return LoggedInScreen(username: loggedInUser ?? 'Unknown');
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            );
+          } else {
+            // If the user is not logged in, show the login form.
+            return SafeArea(
+                child: Scaffold(
+                    backgroundColor: Colors.amber[900],
+                    body: ListView(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(top: 50.0),
+                          child: const Text(
+                            'SimpleSuppers',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Container(
+                            padding: const EdgeInsets.only(
+                                left: 15, top: 60, right: 15),
+                            child: const LoginForm(
+                              title:
+                                  'SCUBA-dive', // Not sure why this needs a title
+                            )),
+                      ],
+                    )));
+          }
+        } else {
+          // Show a loading indicator while checking the login status.
+          return CircularProgressIndicator();
+        }
+      },
+    );
+  }
+}
+
+class LoggedInScreen extends StatelessWidget {
+  final String username;
+
+  const LoggedInScreen({required this.username});
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Scaffold(
-            backgroundColor: Colors.amber[900],
-            body: ListView(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 50.0),
-                  child: const Text(
-                    'SimpleSuppers',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold),
-                  ),
+      child: Scaffold(
+        backgroundColor: Colors.amber[900],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Logged in as $username',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                Container(
-                    padding:
-                        const EdgeInsets.only(left: 15, top: 60, right: 15),
-                    child: const LoginForm(
-                      title: 'SCUBA-dive', // Not sure why this needs a title
-                    )),
-              ],
-            )));
+              ),
+              // Add any additional content for the logged-in state.
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () async {
+                  // Trigger the logout function when the button is pressed.
+                  await AuthService().logout();
+                  // Navigate back to the login screen after logging out.
+                  /*Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Login(
+                        title: '',
+                      ),
+                    ),
+                  );*/
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.red, // Customize button color
+                  minimumSize: const Size(150, 45),
+                ),
+                child: const Text('LOGOUT'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -60,6 +143,15 @@ class LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   String? _email;
   String? _password;
+
+  void _navigateToLoggedInScreen(BuildContext context, String username) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoggedInScreen(username: username),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,9 +244,17 @@ class LoginFormState extends State<LoginForm> {
               onPressed: () async {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!
-                      .save(); // This triggers onSaved for each field
-                  await AuthService().login(_email!, _password!);
+                  _formKey.currentState!.save();
+
+                  // The login method should return a bool.
+                  bool loginSuccess =
+                      await AuthService().login(_email!, _password!);
+
+                  if (loginSuccess) {
+                    // Use the function to navigate to the LoggedInScreen.
+                    //DEACTIVATED FOR NOW
+                    //_navigateToLoggedInScreen(context, _email ?? 'Unknown');
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(

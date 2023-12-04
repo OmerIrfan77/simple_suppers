@@ -164,7 +164,7 @@ class AuthService {
       _username = null;
     }
     print('Logged in user (after login): $_username');
-    return _username;
+    return true;
   }
 
   Future logout() async {
@@ -173,7 +173,16 @@ class AuthService {
     return null;
   }
 
-  static Future<String?> getUsername() async {
+  Future<bool> isLoggedIn() async {
+    // Check if the stored username is null
+    if (_username == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  Future<String?> getUsername() async {
     // Return the stored username
     return _username;
   }
