@@ -1,21 +1,19 @@
 class Ingredient {
-  final int id;
   final String name;
-  final String quantity;
-  final int recipeId;
+  final int quantity;
+  final String quantityType;
 
-  Ingredient(
-      {required this.id,
-      required this.name,
-      required this.quantity,
-      required this.recipeId});
+  Ingredient({
+    required this.name,
+    required this.quantity,
+    required this.quantityType,
+  });
 
   static Ingredient transform(Map<String, dynamic> json) {
     return Ingredient(
-      id: json['id'],
       name: json['name'],
       quantity: json['quantity'],
-      recipeId: json['recipe_id'],
+      quantityType: json['quantity_type'],
     );
   }
 }

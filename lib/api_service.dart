@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
 const String apiUrl = 'http://localhost:3000/api';
@@ -49,15 +50,18 @@ Future<List<Map<String, dynamic>>> searchRecipes(
 }
 
 // Fetch all the ingredients for a specific recipe
-Future<List> fetchIngredients(int recipeId) async {
+Future<List<Ingredient>> fetchIngredients(int recipeId) async {
+  List<Ingredient> ingredients = [];
   final response =
       await http.get(Uri.parse('$apiUrl/recipe_ingredients/$recipeId'));
   if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
-    return responseData;
+    for (var ingredient in json.decode(response.body)) {
+      ingredients.add(Ingredient.transform(ingredient));
+    }
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }
+  return ingredients;
 }
 
 Future<int?> addRecipe({
@@ -86,6 +90,7 @@ Future<int?> addRecipe({
       rating > 5 ||
       imageLink.isEmpty) {
     print('Invalid input values. Please check and try again.');
+    return null;
   }
 
   // Data to be sent in the request body
@@ -131,11 +136,12 @@ Future<int?> addRecipe({
 // User authentication functions //
 
 class AuthService {
-  final String baseUrl = 'http://localhost:3000/api';
+  // Variable for storing the logged in username
+  static String? _username;
 
   Future register(String username, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/register'),
+      Uri.parse('$apiUrl/register'),
       body: jsonEncode({'username': username, 'password': password}),
       headers: {'Content-Type': 'application/json'},
     );
@@ -145,20 +151,35 @@ class AuthService {
 
   Future login(String username, String password) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/login'),
+      Uri.parse('$apiUrl/login'),
       body: jsonEncode({'username': username, 'password': password}),
       headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      // If the response is good, meaning the password is correct,
+      // store the logged in username in the AuthService class
+      _username = jsonDecode(response.body)["username"];
+    } else {
+      // If the response is bad, clear the stored username
+      _username = null;
+    }
+
+    return _username;
+  }
+
+  Future logout() async {
+    // Clear the stored username
+    _username = null;
+    final response = await http.post(
+      Uri.parse('$apiUrl/logout'),
     );
 
     return jsonDecode(response.body);
   }
 
-  Future logout() async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/logout'),
-      headers: {'Authorization': 'Bearer yourToken'},
-    );
-
-    return jsonDecode(response.body);
+  static Future<String?> getUsername() async {
+    // Return the stored username
+    return _username;
   }
 }
