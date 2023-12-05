@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:simple_suppers/api_service.dart'
     show addRecipe, fetchSingleRecipe;
 import 'package:simple_suppers/screens/recipe_details.dart';
@@ -16,6 +17,7 @@ class RecipeFormPage extends StatefulWidget {
 }
 
 class _RecipeFormPageState extends State<RecipeFormPage> {
+  final _formKey = GlobalKey<FormState>();
   TextEditingController imageUrlController = TextEditingController();
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -30,9 +32,15 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   static const String addRecipeButton = "Add Recipe";
   static const String updateRecipeButton = "Update Recipe";
 
+  bool loaded = false;
+
   Future<Recipe?> fetchRecipe() async {
     try {
-      return fetchSingleRecipe(widget.recipeId);
+      if (loaded == false) {
+        return fetchSingleRecipe(widget.recipeId);
+      } else {
+        return null;
+      }
     } catch (e) {
       _logger.info("No recipe found, initialize with empty add recipe view.");
       return null;
@@ -48,6 +56,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
             return const CircularProgressIndicator();
           } else {
             final recipe = snapshot.data;
+            loaded = true;
 
             if (recipe != null) {
               imageUrlController.text = recipe.imageLink!;
@@ -61,7 +70,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
               difficultyDropdownValue = recipe.difficulty;
             }
 
-            return Container(
+            return Form(
+              key: _formKey,
+              child: Container(
                 padding: const EdgeInsets.all(16.0),
                 color: Colors.white,
                 child: Scaffold(
@@ -91,8 +102,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                           height: 200,
                                           fit: BoxFit.fill,
                                         ),
-                                        IconButton(
-                                          icon: const Icon(Icons.edit),
+                                          IconButton(
+                                            icon: const Icon(Icons.edit),
+                                            color: Colors.white,
                                           onPressed: () {
                                             _showAddImageUrlDialog(context);
                                           },
@@ -112,17 +124,33 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                           TextFormField(
                             controller: titleController,
                             decoration:
-                                const InputDecoration(labelText: 'Title'),
+                                  const InputDecoration(labelText: 'Title *'),
+                              maxLength: 15,
+                              maxLengthEnforcement:
+                                  MaxLengthEnforcement.enforced,
+                              validator: (value) {
+                                return (value == null || value.isEmpty)
+                                    ? 'Can not be empty!'
+                                    : null;
+                              },
                           ),
-                          const SizedBox(height: 16.0),
+                            const SizedBox(height: 8.0),
                           // Short Description
                           TextFormField(
                             controller: descriptionController,
                             decoration: const InputDecoration(
                                 labelText: 'Short Description'),
                             maxLines: null,
+                              maxLength: 45,
+                              maxLengthEnforcement:
+                                  MaxLengthEnforcement.enforced,
+                              validator: (value) {
+                                return (value == null || value.isEmpty)
+                                    ? 'Can not be empty!'
+                                    : null;
+                              },
                           ),
-                          const SizedBox(height: 16.0),
+                            const SizedBox(height: 8.0),
                           // Estimated Time and Difficulty
                           Row(
                             children: [
@@ -133,6 +161,11 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   decoration: const InputDecoration(
                                       hintText: 'mins',
                                       labelText: 'Estimated Time'),
+                                    validator: (value) {
+                                      return (value == null || value.isEmpty)
+                                          ? 'Can not be empty!'
+                                          : null;
+                                    },
                                 ),
                               ),
                               const SizedBox(width: 16.0),
@@ -143,6 +176,11 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   decoration: const InputDecoration(
                                       labelText: 'Budget',
                                       hintText: '(e.g. cheap)'),
+                                    validator: (value) {
+                                      return (value == null || value.isEmpty)
+                                          ? 'Can not be empty!'
+                                          : null;
+                                    },
                                 ),
                               ),
                             ],
@@ -237,6 +275,14 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                     onChanged: (value) {
                                       steps[i] = value;
                                     },
+                                      maxLength: 100,
+                                      maxLengthEnforcement:
+                                          MaxLengthEnforcement.enforced,
+                                      validator: (value) {
+                                        return (value == null || value.isEmpty)
+                                            ? 'Can not be empty!'
+                                            : null;
+                                      },
                                   ),
                                 ),
                                 IconButton(
@@ -265,38 +311,28 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                           // Add Recipe Button
                           ElevatedButton(
                             onPressed: () async {
-                              // Implement logic to send recipe data to the database
-                              int? result = await addRecipe(
-                                  recipeId: widget.recipeId,
-                                  instructions: steps.join(";"),
-                                  difficulty:
-                                      int.tryParse(difficultyController.text) ??
-                                          1,
-                                  time: int.tryParse(timeController.text) ?? 0,
-                                  budget: budgetController.text,
-                                  creatorId: 1,
-                                  title: titleController.text,
-                                  shortDescription: descriptionController.text,
-                                  isPublic:
-                                      publicDropdownValue.toLowerCase() == 'yes'
-                                          ? 1
-                                          : 0,
-                                  rating: 5,
-                                  imageLink: imageUrlController.text);
-                              if (mounted) {
-                                if (result != null) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            RecipeDetails(recipeId: result),
-                                      ));
-                                } else {
-                                  const SnackBar(
-                                    content: Text('Failed to add recipe!'),
+                                // Validate returns true if the form is valid, or false otherwise.
+                                if (_formKey.currentState!.validate()) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Done!')),
                                   );
+                                  // Implement logic to send recipe data to the database
+                                  int? result = await addOrUpdate();
+                                  if (mounted) {
+                                    if (result != null) {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RecipeDetails(recipeId: result),
+                                          ));
+                                    } else {
+                                      const SnackBar(
+                                        content: Text('Failed to add recipe!'),
+                                      );
+                                    }
+                                  }
                                 }
-                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange,
@@ -308,9 +344,25 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                       ),
                     ),
                   ),
-                ));
+                  )),
+            );
           }
         });
+  }
+
+  Future<int?> addOrUpdate() {
+    return addRecipe(
+        recipeId: widget.recipeId,
+        instructions: steps.join(";"),
+        difficulty: int.tryParse(difficultyController.text) ?? 1,
+        time: int.tryParse(timeController.text) ?? 0,
+        budget: budgetController.text,
+        creatorId: 1,
+        title: titleController.text,
+        shortDescription: descriptionController.text,
+        isPublic: publicDropdownValue.toLowerCase() == 'yes' ? 1 : 0,
+        rating: 5,
+        imageLink: imageUrlController.text);
   }
 
   // Function to show the pop-up window for adding image URL

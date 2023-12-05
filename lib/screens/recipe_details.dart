@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:simple_suppers/components/labels.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
-import 'package:simple_suppers/main.dart' show MyHomePage;
 import 'package:simple_suppers/screens/add_recipe.dart';
 import '../api_service.dart';
 
