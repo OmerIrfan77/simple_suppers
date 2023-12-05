@@ -27,8 +27,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   String publicDropdownValue = "Yes";
   var difficultyList = [1, 2, 3];
   int difficultyDropdownValue = 1;
-
-  final String add_recipe_button = "Add Recipe";
+  static const String addRecipeButton = "Add Recipe";
+  static const String updateRecipeButton = "Update Recipe";
 
   Future<Recipe?> fetchRecipe() async {
     try {
@@ -53,8 +53,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
               imageUrlController.text = recipe.imageLink!;
               titleController.text = recipe.title;
               descriptionController.text = recipe.shortDescription!;
-              timeController.text = recipe.time as String;
-              difficultyController.text = recipe.difficulty as String;
+              timeController.text = recipe.time.toString();
+              difficultyController.text = recipe.difficulty.toString();
               budgetController.text = recipe.budget;
               steps = recipe.instructions.split(';');
               publicDropdownValue = recipe.isPublic == 1 ? "Yes" : "No";
@@ -267,6 +267,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                             onPressed: () async {
                               // Implement logic to send recipe data to the database
                               int? result = await addRecipe(
+                                  recipeId: widget.recipeId,
                                   instructions: steps.join(";"),
                                   difficulty:
                                       int.tryParse(difficultyController.text) ??
@@ -284,7 +285,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   imageLink: imageUrlController.text);
                               if (mounted) {
                                 if (result != null) {
-                                  // if (context.mounted) {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -302,7 +302,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                               backgroundColor: Colors.orange,
                               elevation: 4,
                             ),
-                            child: const Text(add_recipe_button),
+                            child: Text(buttonText()),
                           ),
                         ],
                       ),
@@ -353,5 +353,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
         );
       },
     );
+  }
+
+  String buttonText() {
+    return widget.recipeId == 0 ? addRecipeButton : updateRecipeButton;
   }
 }

@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://localhost:3000/api';
+const String apiUrl = 'http://10.0.2.2:3000/api';
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
@@ -65,6 +65,7 @@ Future<List<Ingredient>> fetchIngredients(int recipeId) async {
 }
 
 Future<int?> addRecipe({
+  required int recipeId,
   required String instructions,
   required int difficulty,
   required int time,
@@ -107,28 +108,40 @@ Future<int?> addRecipe({
     'image_link': imageLink,
   };
 
+  final http.Response response;
+
   try {
-    final http.Response response = await http.post(
+    if (recipeId == 0) {
+      response = await http.post(
       Uri.parse('$apiUrl/recipes'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(data),
-    );
+      );
+      print('Adding recipe');
+    } else {
+      response = await http.put(Uri.parse('$apiUrl/recipe/$recipeId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data));
+      print('Updating recipe');
+    }
 
     if (response.statusCode == 200) {
-      // Recipe added successfully
-      print('Recipe added successfully');
+      // Recipe added/updated successfully
+      print('Recipe added/updated successfully');
       print('Response data: ${response.body}');
       final Map<String, dynamic> responseData = json.decode(response.body);
       return responseData['recipeId'];
     } else {
       // Error adding recipe
-      print('Failed to add recipe. Error: ${response.reasonPhrase}');
+      print('Failed to add/update recipe. Error: ${response.reasonPhrase}');
     }
   } catch (error) {
     // Handle network errors
-    print('Error sending POST request: $error');
+    print('Error sending POST/PUT request: $error');
   }
   return null;
 }

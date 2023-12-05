@@ -3,6 +3,7 @@ import 'package:simple_suppers/components/labels.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/main.dart' show MyHomePage;
+import 'package:simple_suppers/screens/add_recipe.dart';
 import '../api_service.dart';
 
 // Display detailed view of a recipe, i.e. picture, description,
@@ -61,14 +62,30 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                     Positioned(
                         bottom: 10,
                         left: 10,
-                        child: Text(
+                        child: Row(children: [
+                          Text(
                           recipe.title,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
                           ),
-                        )),
+                          ),
+                          if (widget.recipeId != //change to creatorId later
+                              0) // Conditionally show the Icon child
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              color: Colors.white,
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => RecipeFormPage(
+                                          recipeId: widget.recipeId),
+                                    ));
+                              },
+                            ),
+                        ])),
                     const Positioned(
                       bottom: 40,
                       right: 10,
