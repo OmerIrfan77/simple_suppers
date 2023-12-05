@@ -177,21 +177,26 @@ class AuthService {
       // If the response is bad, clear the stored username
       _username = null;
     }
-
-    return _username;
+    print('Logged in user (after login): $_username');
+    return true;
   }
 
   Future logout() async {
     // Clear the stored username
     _username = null;
-    final response = await http.post(
-      Uri.parse('$apiUrl/logout'),
-    );
-
-    return jsonDecode(response.body);
+    return null;
   }
 
-  static Future<String?> getUsername() async {
+  Future<bool> isLoggedIn() async {
+    // Check if the stored username is null
+    if (_username == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  Future<String?> getUsername() async {
     // Return the stored username
     return _username;
   }
