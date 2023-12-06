@@ -5,6 +5,7 @@ import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/bottom_bar.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
+import 'package:simple_suppers/screens/search_results.dart';
 import 'package:simple_suppers/search_filter_bottom_sheet.dart';
 // import the 'api_service.dart' file from backend folder
 import 'api_service.dart';
@@ -55,23 +56,32 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // List to hold the results from the API call
   int currentIndex = 0;
+  int maxTime = 1;
+  int maxDifficulty = 1;
 
   Future<List<Recipe>> allRecipes() async {
     return await fetchAllRecipes();
   }
 
-  void onBottomBarTap(int index) {
+  Future<void> onBottomBarTap(int index) async {
     setState(() {
       currentIndex = index;
     });
     if (currentIndex == 2) {
-      showModalBottomSheet(
+      final result = await showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
           return SearchFilterBottomSheet();
-          },
+        },
       );
-      
+
+      if (result != null) {
+        print('Result: $result');
+        setState(() {
+          maxTime = result[0];
+          maxDifficulty = int.parse(result[1]);
+        });
+      }
     }
   }
 
@@ -124,6 +134,12 @@ class _MyHomePageState extends State<MyHomePage> {
         break;
       case 1:
         bodyWidget = const RecipeFormPage();
+        break;
+      case 2:
+        bodyWidget = SearchResults(
+          maxTime: maxTime,
+          maxDifficulty: maxDifficulty,
+        );
         break;
       case 3:
         bodyWidget = const Text('Random');
