@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/login.dart';
@@ -12,20 +13,6 @@ import 'api_service.dart';
 
 void main() {
   runApp(const MyApp());
-  testLogin('pontus', 'password');
-  testLogout();
-}
-
-void testLogin(String username, String password) async {
-  await AuthService().login(username, password);
-  final user = await AuthService.getUsername();
-  print('Logged in user: $user');
-}
-
-void testLogout() async {
-  await AuthService().logout();
-  final user = await AuthService.getUsername();
-  print('Logged in user: $user');
 }
 
 class MyApp extends StatelessWidget {
@@ -58,14 +45,42 @@ class _MyHomePageState extends State<MyHomePage> {
   int currentIndex = 0;
   int maxTime = 1;
   int maxDifficulty = 1;
+  late Future<List<Recipe>> recipesFuture;
 
   Future<List<Recipe>> allRecipes() async {
     return await fetchAllRecipes();
   }
 
-  Future<void> onBottomBarTap(int index) async {
+  @override
+  void initState() {
+    super.initState();
+    recipesFuture = fetchAllRecipes(); // Initialize the Future in initState
+  }
+
+  // Method to generate a random recipeId
+  int generateRandomRecipeId(List<Recipe> recipes) {
+    final Random random = Random();
+    return recipes.isNotEmpty ? recipes[random.nextInt(recipes.length)].id : 0;
+  }
+
+  void onBottomBarTap(int index) async {
     setState(() {
-      currentIndex = index;
+      if (index == 3) {
+        // If the "Random" button is pressed the currentIndex is not updated.
+        recipesFuture.then((recipes) {
+          int randomRecipeId = generateRandomRecipeId(recipes);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RecipeDetails(
+                recipeId: randomRecipeId,
+              ),
+            ),
+          );
+        });
+      } else {
+        currentIndex = index;
+      }
     });
     if (currentIndex == 2) {
       final result = await showModalBottomSheet(
@@ -142,10 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
         );
         break;
       case 3:
-        bodyWidget = const Text('Random');
+        bodyWidget = homeWidget;
         break;
       case 4:
-        bodyWidget = const Login(
+        bodyWidget = Login(
           title: '',
         );
         break;

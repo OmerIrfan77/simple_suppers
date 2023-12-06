@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://localhost:3000/api';
+const String apiUrl = 'http://10.0.2.2:3000/api';
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
@@ -67,6 +67,7 @@ Future<List<Ingredient>> fetchIngredients(int recipeId) async {
 }
 
 Future<int?> addRecipe({
+  required int recipeId,
   required String instructions,
   required int difficulty,
   required int time,
@@ -92,6 +93,7 @@ Future<int?> addRecipe({
       rating > 5 ||
       imageLink.isEmpty) {
     print('Invalid input values. Please check and try again.');
+    return null;
   }
 
   // Data to be sent in the request body
@@ -108,28 +110,40 @@ Future<int?> addRecipe({
     'image_link': imageLink,
   };
 
+  final http.Response response;
+
   try {
-    final http.Response response = await http.post(
+    if (recipeId == 0) {
+      response = await http.post(
       Uri.parse('$apiUrl/recipes'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(data),
-    );
+      );
+      print('Adding recipe');
+    } else {
+      response = await http.put(Uri.parse('$apiUrl/recipe/$recipeId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(data));
+      print('Updating recipe');
+    }
 
     if (response.statusCode == 200) {
-      // Recipe added successfully
-      print('Recipe added successfully');
+      // Recipe added/updated successfully
+      print('Recipe added/updated successfully');
       print('Response data: ${response.body}');
       final Map<String, dynamic> responseData = json.decode(response.body);
       return responseData['recipeId'];
     } else {
       // Error adding recipe
-      print('Failed to add recipe. Error: ${response.reasonPhrase}');
+      print('Failed to add/update recipe. Error: ${response.reasonPhrase}');
     }
   } catch (error) {
     // Handle network errors
-    print('Error sending POST request: $error');
+    print('Error sending POST/PUT request: $error');
   }
   return null;
 }
@@ -139,6 +153,9 @@ Future<int?> addRecipe({
 class AuthService {
   // Variable for storing the logged in username
   static String? _username;
+
+  // Store the user id
+  static int? _id;
 
   Future register(String username, String password) async {
     final response = await http.post(
@@ -161,26 +178,39 @@ class AuthService {
       // If the response is good, meaning the password is correct,
       // store the logged in username in the AuthService class
       _username = jsonDecode(response.body)["username"];
+      _id = jsonDecode(response.body)["id"];
     } else {
       // If the response is bad, clear the stored username
       _username = null;
+      return false;
     }
-
-    return _username;
+    print('Logged in user (after login): $_username');
+    return true;
   }
 
   Future logout() async {
     // Clear the stored username
     _username = null;
-    final response = await http.post(
-      Uri.parse('$apiUrl/logout'),
-    );
-
-    return jsonDecode(response.body);
+    _id = null;
+    return null;
   }
 
-  static Future<String?> getUsername() async {
+  Future<bool> isLoggedIn() async {
+    // Check if the stored username is null
+    if (_username == null) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  Future<String?> getUsername() async {
     // Return the stored username
     return _username;
+  }
+
+  Future<int?> getId() async {
+    // Return the stored username
+    return _id;
   }
 }

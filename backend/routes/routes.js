@@ -57,8 +57,8 @@ router.post("/recipes", (req, res) => {
       }
 
       const sql = `
-                INSERT INTO recipes 
-                (instructions, difficulty, time, budget, creator_id, title, short_description, is_public, rating, image_link) 
+                INSERT INTO recipes
+                (instructions, difficulty, time, budget, creator_id, title, short_description, is_public, rating, image_link)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
@@ -93,25 +93,91 @@ router.post("/recipes", (req, res) => {
   }
 });
 
+// PUT to update a single recipe
+router.put('/recipe/:id', (req, res) => {
+  const {
+    instructions,
+    difficulty,
+    time,
+    budget,
+    creator_id,
+    title,
+    short_description,
+    is_public,
+    rating,
+    image_link,
+  } = req.body;
+  const id = req.params.id;
+  const db = require('../server').db;
+
+  const sql = `
+  UPDATE recipes
+  SET instructions = ?, difficulty = ?, time = ?, budget = ?, title = ?, short_description = ?, is_public = ?, rating = ?, image_link = ?
+  WHERE id = ?
+`;
+
+  db.query(
+    sql,
+    [instructions,
+      difficulty,
+      time,
+      budget,
+      title,
+      short_description,
+      is_public,
+      rating,
+      image_link,
+      id],
+      (err, results) => {
+        if (err) {
+          console.error('Error updating query:', err);
+          res.status(500).json({ success: false, message: 'Internal Server Error' });
+          return;
+        }
+        console.log('Rows affected:', results.affectedRows);
+        res.json({recipeId: Number(id), message: 'Recipe updated successfully' });
+      }
+  );
+
+});
+
+// router to delete a recipe
+router.delete('/recipe/:id', (req, res) => {
+  const id  = req.params.id;
+  const db = require('../server').db;
+
+  const sql = 'DELETE FROM recipes WHERE id = ?';
+
+  db.query(sql, [id], (err, results) => {
+    if (err) {
+      console.error('Error deleting recipe:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+    console.log('Rows affected:', results.affectedRows);
+    res.json({ message: 'Recipe deleted successfully' });
+  });
+});
+
 // Search recipes by difficulty
 router.get('/recipes/search', (req, res) => {
     const db = require('../server').db;
     const { time, difficulty } = req.query;
-  
+
     // Check if at least one parameter is provided
     if (!time && !difficulty) {
       return res.status(400).json({ error: 'At least one parameter (time or difficulty) is required' });
     }
-  
+
     // Build the WHERE clause based on provided parameters
     let whereClause = '';
     let params = [];
-  
+
     if (time) {
       whereClause += 'time <= ?';
       params.push(Number(time));
     }
-  
+
     if (difficulty) {
       if (whereClause) {
         whereClause += ' AND ';
@@ -119,19 +185,19 @@ router.get('/recipes/search', (req, res) => {
       whereClause += 'difficulty <= ?';
       params.push(Number(difficulty));
     }
-  
+
     const query = `SELECT * FROM recipes${whereClause ? ' WHERE ' + whereClause : ''}`;
-  
+
     db.query(query, params, (error, results) => {
       if (error) {
         console.error('Error executing search query:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
-  
+
       res.json(results);
     });
   });
-  
+
 
 // USER RELATED ROUTES
 
@@ -169,9 +235,9 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
       } else if (results.length > 0) {
         const match = await bcrypt.compare(password, results[0].password);
-        
+
         if (match) {
-          res.json({ username: results[0].username });
+          res.json({ username: results[0].username, id: results[0].id });
         } else {
           res.status(401).json({ error: "Invalid credentials" });
         }
