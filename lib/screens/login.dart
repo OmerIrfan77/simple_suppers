@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
+import 'package:simple_suppers/components/recipe_preview.dart';
+import 'package:simple_suppers/main.dart';
+import 'package:simple_suppers/models/recipe.dart';
+import 'package:simple_suppers/screens/recipe_details.dart';
 
 class Login extends StatelessWidget {
   Login({super.key, required String title});
@@ -65,25 +69,72 @@ class Login extends StatelessWidget {
 
 class LoggedInScreen extends StatelessWidget {
   final String username;
+  final int? userId;
+  const LoggedInScreen({required this.username, this.userId});
 
-  const LoggedInScreen({required this.username});
+  Future<List<Recipe>> allRecipes() async {
+    return await fetchAllRecipes();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.amber[900],
-        body: Center(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.grey[850],
+          title: Text(
+            "Simple Suppers",
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        body: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Logged in as $username',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              SizedBox(
+                height: 100.0,
+                child: Text(
+                  "username is: $username, and id is: $userId",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+              ),
+              FutureBuilder(
+                future: allRecipes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: List.generate(
+                        snapshot.data!.length,
+                        (index) => RecipePreview(
+                          title: snapshot.data![index].title,
+                          shortDescription:
+                              snapshot.data![index].shortDescription,
+                          imageLink: snapshot.data![index].imageLink,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => RecipeDetails(
+                                  // title: snapshot.data![index].title,
+                                  recipeId: snapshot.data![index].id,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('${snapshot.error}');
+                  }
+                  return const CircularProgressIndicator();
+                },
               ),
               // Add any additional content for the logged-in state.
               SizedBox(height: 20),
@@ -92,14 +143,14 @@ class LoggedInScreen extends StatelessWidget {
                   // Trigger the logout function when the button is pressed.
                   await AuthService().logout();
                   // Navigate back to the login screen after logging out.
-                  /*Navigator.pushReplacement(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => Login(
                         title: '',
                       ),
                     ),
-                  );*/
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -144,11 +195,15 @@ class LoginFormState extends State<LoginForm> {
   String? _email;
   String? _password;
 
-  void _navigateToLoggedInScreen(BuildContext context, String username) {
-    Navigator.pushReplacement(
+  void _navigateToLoggedInScreen(
+      BuildContext context, String username, int? userId) {
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LoggedInScreen(username: username),
+        builder: (context) => LoggedInScreen(
+          username: username,
+          userId: userId,
+        ),
       ),
     );
   }
@@ -250,10 +305,11 @@ class LoginFormState extends State<LoginForm> {
                   bool loginSuccess =
                       await AuthService().login(_email!, _password!);
 
-                  if (loginSuccess) {
+                  if (loginSuccess == true) {
                     // Use the function to navigate to the LoggedInScreen.
-                    //DEACTIVATED FOR NOW
-                    //_navigateToLoggedInScreen(context, _email ?? 'Unknown');
+                    // Bring username and id from login function.
+                    _navigateToLoggedInScreen(context, _email ?? 'Unknown',
+                        await AuthService().getId());
                   }
                 }
               },
