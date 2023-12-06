@@ -69,8 +69,8 @@ class Login extends StatelessWidget {
 
 class LoggedInScreen extends StatelessWidget {
   final String username;
-
-  const LoggedInScreen({required this.username});
+  final int? userId;
+  const LoggedInScreen({required this.username, this.userId});
 
   Future<List<Recipe>> allRecipes() async {
     return await fetchAllRecipes();
@@ -97,7 +97,7 @@ class LoggedInScreen extends StatelessWidget {
               SizedBox(
                 height: 100.0,
                 child: Text(
-                  username,
+                  "username is: $username, and id is: $userId",
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -195,11 +195,15 @@ class LoginFormState extends State<LoginForm> {
   String? _email;
   String? _password;
 
-  void _navigateToLoggedInScreen(BuildContext context, String username) {
+  void _navigateToLoggedInScreen(
+      BuildContext context, String username, int? userId) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LoggedInScreen(username: username),
+        builder: (context) => LoggedInScreen(
+          username: username,
+          userId: userId,
+        ),
       ),
     );
   }
@@ -301,9 +305,11 @@ class LoginFormState extends State<LoginForm> {
                   bool loginSuccess =
                       await AuthService().login(_email!, _password!);
 
-                  if (loginSuccess) {
+                  if (loginSuccess == true) {
                     // Use the function to navigate to the LoggedInScreen.
-                    _navigateToLoggedInScreen(context, _email ?? 'Unknown');
+                    // Bring username and id from login function.
+                    _navigateToLoggedInScreen(context, _email ?? 'Unknown',
+                        await AuthService().getId());
                   }
                 }
               },

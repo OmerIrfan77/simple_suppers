@@ -139,6 +139,9 @@ class AuthService {
   // Variable for storing the logged in username
   static String? _username;
 
+  // Store the user id
+  static int? _id;
+
   Future register(String username, String password) async {
     final response = await http.post(
       Uri.parse('$apiUrl/register'),
@@ -160,9 +163,11 @@ class AuthService {
       // If the response is good, meaning the password is correct,
       // store the logged in username in the AuthService class
       _username = jsonDecode(response.body)["username"];
+      _id = jsonDecode(response.body)["id"];
     } else {
       // If the response is bad, clear the stored username
       _username = null;
+      return false;
     }
     print('Logged in user (after login): $_username');
     return true;
@@ -171,6 +176,7 @@ class AuthService {
   Future logout() async {
     // Clear the stored username
     _username = null;
+    _id = null;
     return null;
   }
 
@@ -186,5 +192,10 @@ class AuthService {
   Future<String?> getUsername() async {
     // Return the stored username
     return _username;
+  }
+
+  Future<int?> getId() async {
+    // Return the stored username
+    return _id;
   }
 }
