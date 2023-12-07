@@ -10,11 +10,12 @@ import 'package:simple_suppers/screens/add_recipe.dart';
 import 'api_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+  final AuthService auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -24,15 +25,19 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'SimpleSuppers'),
+      home: MyHomePage(
+        title: 'SimpleSuppers',
+        auth: auth,
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
   final String title;
+  final AuthService auth;
+  const MyHomePage({super.key, required this.title, required this.auth});
+
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -139,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
       case 4:
         bodyWidget = Login(
           title: '',
+          auth: widget.auth,
         );
         break;
       default:
