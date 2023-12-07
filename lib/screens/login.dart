@@ -6,7 +6,7 @@ import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 
 class Login extends StatelessWidget {
-  Login({super.key, required String title});
+  Login({super.key});
   final AuthService auth = AuthService();
 
   @override
@@ -72,15 +72,15 @@ class LoggedInScreen extends StatelessWidget {
   final int? userId;
   const LoggedInScreen({required this.username, this.userId});
 
-  Future<List<Recipe>> allRecipes() async {
-    return await fetchAllRecipes();
+  Future<List<Recipe>> userRecipes() async {
+    return await fetchUserRecipes(userId!);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 249, 240),
         appBar: AppBar(
           backgroundColor: Colors.grey[850],
           title: Text(
@@ -92,20 +92,56 @@ class LoggedInScreen extends StatelessWidget {
           ),
         ),
         body: SingleChildScrollView(
+          // Account icon/picture and username
           child: Column(
             children: [
-              SizedBox(
-                height: 100.0,
-                child: Text(
-                  "username is: $username, and id is: $userId",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.account_circle,
+                      size: 124.0,
+                      color: Colors.grey[350],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0, left: 5.0),
+                      child: Text(
+                        username,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
+              // Display the number of recipes the user has
               FutureBuilder(
-                future: allRecipes(),
+                  future: userRecipes(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      String recipeCount = snapshot.data!.length.toString();
+                      return (Text(
+                        '$recipeCount recipes',
+                        style: TextStyle(
+                          color: Colors.amber[900],
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ));
+                    } else if (snapshot.hasError) {
+                      return Text('${snapshot.error}');
+                    }
+                    return const CircularProgressIndicator();
+                  }),
+              // User recieps
+              FutureBuilder(
+                future: userRecipes(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Column(
@@ -113,6 +149,8 @@ class LoggedInScreen extends StatelessWidget {
                         snapshot.data!.length,
                         (index) => RecipePreview(
                           title: snapshot.data![index].title,
+                          difficultyLevel: snapshot.data![index].difficulty,
+                          time: snapshot.data![index].time,
                           shortDescription:
                               snapshot.data![index].shortDescription,
                           imageLink: snapshot.data![index].imageLink,
@@ -146,9 +184,7 @@ class LoggedInScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Login(
-                        title: '',
-                      ),
+                      builder: (context) => Login(),
                     ),
                   );
                 },
