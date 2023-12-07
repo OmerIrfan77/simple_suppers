@@ -4,17 +4,41 @@ import 'package:simple_suppers/components/labels.dart';
 class RecipePreview extends StatelessWidget {
   final void Function() onTap;
   final String title;
+  final int difficultyLevel;
+  final int time;
   final String? shortDescription;
   final String? imageLink;
-  const RecipePreview(
+  RecipePreview(
       {super.key,
       required this.onTap,
       required this.title,
+      required this.difficultyLevel,
+      required this.time,
       this.shortDescription,
       this.imageLink});
 
   @override
   Widget build(BuildContext context) {
+    Difficulty difficulty = Difficulty.beginner;
+    int timeTaken = time;
+    TimeUnit timeUnit = TimeUnit.minutes;
+    switch (difficultyLevel) {
+      case 1:
+        difficulty = Difficulty.beginner;
+        break;
+      case 2:
+        difficulty = Difficulty.intermediate;
+        break;
+      case 3:
+        difficulty = Difficulty.advanced;
+        break;
+    }
+
+    if (timeTaken > 60) {
+      timeTaken = timeTaken ~/ 60;
+      timeUnit = TimeUnit.hours;
+    }
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -69,12 +93,11 @@ class RecipePreview extends StatelessWidget {
                         const SizedBox(
                             height:
                                 10.0), // Add some space between subtitle and labels
-                        const Row(
+                        Row(
                           children: [
-                            DifficultyLabel(
-                                difficultyLevel: Difficulty.beginner),
-                            SizedBox(width: 10.0),
-                            TimeLabel(amount: '30', unit: TimeUnit.minutes),
+                            DifficultyLabel(difficultyLevel: difficulty),
+                            const SizedBox(width: 10.0),
+                            TimeLabel(amount: time.toString(), unit: timeUnit),
                           ],
                         ),
                         const SizedBox(

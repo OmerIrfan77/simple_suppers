@@ -43,7 +43,6 @@ Future<List<Recipe>> searchRecipes(int? maxTime, int? maxDifficulty) async {
   final response = await http.get(uri);
 
   if (response.statusCode == 200) {
-    print('------Response data: ${json.decode(response.body)}');
     List<Recipe> recipes = [];
     for (var recipe in json.decode(response.body)) {
       recipes.add(Recipe.transform(recipe));
