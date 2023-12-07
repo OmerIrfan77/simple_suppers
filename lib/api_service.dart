@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
@@ -10,6 +11,19 @@ String apiUrl = Platform.isAndroid
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
+  if (response.statusCode == 200) {
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
+Future<List<Recipe>> fetchUserRecipes(int userId) async {
+  final response = await http.get(Uri.parse('$apiUrl/recipes/user/$userId'));
   if (response.statusCode == 200) {
     List<Recipe> recipes = [];
     for (var recipe in json.decode(response.body)) {
