@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://localhost:3000/api';
+String apiUrl = Platform.isAndroid
+    ? 'http://10.0.2.2:3000/api'
+    : 'http://localhost:3000/api';
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
@@ -42,8 +45,7 @@ Future<Recipe> fetchSingleRecipe(int id) async {
   }
 }
 
-Future<List<Map<String, dynamic>>> searchRecipes(
-    {int? maxTime, int? maxDifficulty}) async {
+Future<List<Recipe>> searchRecipes(int? maxTime, int? maxDifficulty) async {
   // Build the URL with the query parameters
   final Uri uri = Uri.parse('$apiUrl/recipes/search').replace(queryParameters: {
     'time': maxTime?.toString(),
@@ -55,9 +57,11 @@ Future<List<Map<String, dynamic>>> searchRecipes(
   final response = await http.get(uri);
 
   if (response.statusCode == 200) {
-    final List<dynamic> responseData = json.decode(response.body);
-    // Convert the response data to a List<Map<String, dynamic>>
-    return List<Map<String, dynamic>>.from(responseData);
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
   } else {
     throw Exception('API Error: ${response.statusCode}');
   }

@@ -149,6 +149,8 @@ class LoggedInScreen extends StatelessWidget {
                         snapshot.data!.length,
                         (index) => RecipePreview(
                           title: snapshot.data![index].title,
+                          difficultyLevel: snapshot.data![index].difficulty,
+                          time: snapshot.data![index].time,
                           shortDescription:
                               snapshot.data![index].shortDescription,
                           imageLink: snapshot.data![index].imageLink,
