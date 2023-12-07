@@ -167,14 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
         bodyWidget = homeWidget;
         break;
       case 4:
-<<<<<<< HEAD
         bodyWidget = Login(
           title: '',
           auth: widget.auth,
         );
-=======
-        bodyWidget = Login();
->>>>>>> main
         break;
       default:
         bodyWidget = homeWidget;
