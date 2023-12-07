@@ -30,7 +30,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        leading: const BackButton(color: Colors.white),
+        leading: const BackButton(
+          color: Colors.white,
+        ),
         title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -57,7 +59,20 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                   // Stack text on picture
                   Stack(children: [
                     Image.network(recipe.imageLink ??
-                        'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg'),
+                          'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
+                      },
+                      errorBuilder: (BuildContext context, Object error,
+                          StackTrace? stackTrace) {
+                        return Image.asset('assets/placeholder_image.jpg');
+                      },
+                    ),
                     Positioned(
                         bottom: 10,
                         left: 10,
@@ -81,7 +96,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     MaterialPageRoute(
                                       builder: (context) => RecipeFormPage(
                                           recipeId: widget.recipeId),
-                                    ));
+                                    )).then((value) => setState(() {}));
                               },
                             ),
                         ])),

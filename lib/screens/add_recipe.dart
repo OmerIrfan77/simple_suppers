@@ -101,6 +101,23 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                           width: double.infinity,
                                           height: 200,
                                           fit: BoxFit.fill,
+                                            loadingBuilder:
+                                                (BuildContext context,
+                                                    Widget child,
+                                                    ImageChunkEvent?
+                                                        loadingProgress) {
+                                              if (loadingProgress == null) {
+                                                return child;
+                                              } else {
+                                                return const CircularProgressIndicator();
+                                              }
+                                            },
+                                            errorBuilder: (BuildContext context,
+                                                Object error,
+                                                StackTrace? stackTrace) {
+                                              return Image.asset(
+                                                  'assets/placeholder_image.jpg');
+                                            },
                                         ),
                                           IconButton(
                                             icon: const Icon(Icons.edit),
@@ -320,12 +337,18 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   int? result = await addOrUpdate();
                                   if (mounted) {
                                     if (result != null) {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                RecipeDetails(recipeId: result),
-                                          ));
+                                      if (widget.recipeId != 0) {
+                                        Navigator.pop(context, result);
+                                      } else {
+                                        await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    RecipeDetails(
+                                                        recipeId: result)));
+                                        _refreshData();
+                                      }
+
                                     } else {
                                       const SnackBar(
                                         content: Text('Failed to add recipe!'),
@@ -409,5 +432,18 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
 
   String buttonText() {
     return widget.recipeId == 0 ? addRecipeButton : updateRecipeButton;
+  }
+
+  void _refreshData() {
+    setState(() {
+      imageUrlController.text = '';
+      titleController.text = '';
+      descriptionController.text = '';
+      timeController.text = '';
+      budgetController.text = '';
+      steps = [];
+      publicDropdownValue = "Yes";
+      difficultyDropdownValue = 1;
+    });
   }
 }
