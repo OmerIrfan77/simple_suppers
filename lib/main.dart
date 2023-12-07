@@ -137,9 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bodyWidget = homeWidget;
         break;
       case 4:
-        bodyWidget = Login(
-          title: '',
-        );
+        bodyWidget = Login();
         break;
       default:
         bodyWidget = homeWidget;
