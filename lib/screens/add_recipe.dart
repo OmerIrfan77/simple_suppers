@@ -22,7 +22,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController timeController = TextEditingController();
-  TextEditingController difficultyController = TextEditingController();
   TextEditingController budgetController = TextEditingController();
   List<String> steps = [];
   List<String> publicList = <String>['Yes', 'No'];
@@ -63,7 +62,6 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
               titleController.text = recipe.title;
               descriptionController.text = recipe.shortDescription!;
               timeController.text = recipe.time.toString();
-              difficultyController.text = recipe.difficulty.toString();
               budgetController.text = recipe.budget;
               steps = recipe.instructions.split(';');
               publicDropdownValue = recipe.isPublic == 1 ? "Yes" : "No";
