@@ -1,36 +1,55 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
-const secretKey = process.env.JWT_SECRET_KEY
+const secretKey = process.env.JWT_SECRET_KEY;
 
 // Define routes
 
 // Get all recipes
-router.get('/recipes', (req, res) => {
-    const db = require('../server').db;
-    db.query('SELECT * FROM recipes', (error, results) => {
-        if (error) {
-            console.error('Error executing query:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json(results);
-        }
-    });
+router.get("/recipes", (req, res) => {
+  const db = require("../server").db;
+  db.query("SELECT * FROM recipes", (error, results) => {
+    if (error) {
+      console.error("Error executing query:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    } else {
+      res.json(results);
+    }
+  });
 });
 
+// Get all recipes owned by logged in user
+router.get('/recipes/user/:userId', (req, res) => {
+  const db = require('../server').db;
+
+  // Get the user id
+  const userId = req.params.userId;
+
+  const query = 'SELECT * FROM recipes WHERE creator_id = ?';
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error('Error executing query: ', error);
+      res.status(500).json({ error: 'Internal Server Error'});
+    } else {
+      res.json(results);
+    }
+  })
+})
+
 // Get a single recipe
-router.get('/recipe/:id', (req, res) => {
-    const db = require('../server').db;
-    const id = req.params.id;
-    db.query('SELECT * FROM recipes WHERE id = ?', [id], (error, results) => {
-        if (error) {
-            console.error('Error executing query:', error);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json(results);
-        }
-    });
+router.get("/recipe/:id", (req, res) => {
+  const db = require("../server").db;
+  const id = req.params.id;
+  db.query("SELECT * FROM recipes WHERE id = ?", [id], (error, results) => {
+    if (error) {
+      console.error("Error executing query:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    } else {
+      res.json(results);
+    }
+  });
 });
 
 // Post a recipe
@@ -94,7 +113,7 @@ router.post("/recipes", (req, res) => {
 });
 
 // PUT to update a single recipe
-router.put('/recipe/:id', (req, res) => {
+router.put("/recipe/:id", (req, res) => {
   const {
     instructions,
     difficulty,
@@ -108,7 +127,7 @@ router.put('/recipe/:id', (req, res) => {
     image_link,
   } = req.body;
   const id = req.params.id;
-  const db = require('../server').db;
+  const db = require("../server").db;
 
   const sql = `
   UPDATE recipes
@@ -118,7 +137,8 @@ router.put('/recipe/:id', (req, res) => {
 
   db.query(
     sql,
-    [instructions,
+    [
+      instructions,
       difficulty,
       time,
       budget,
@@ -127,77 +147,87 @@ router.put('/recipe/:id', (req, res) => {
       is_public,
       rating,
       image_link,
-      id],
-      (err, results) => {
-        if (err) {
-          console.error('Error updating query:', err);
-          res.status(500).json({ success: false, message: 'Internal Server Error' });
-          return;
-        }
-        console.log('Rows affected:', results.affectedRows);
-        res.json({recipeId: Number(id), message: 'Recipe updated successfully' });
+      id,
+    ],
+    (err, results) => {
+      if (err) {
+        console.error("Error updating query:", err);
+        res
+          .status(500)
+          .json({ success: false, message: "Internal Server Error" });
+        return;
       }
+      console.log("Rows affected:", results.affectedRows);
+      res.json({
+        recipeId: Number(id),
+        message: "Recipe updated successfully",
+      });
+    }
   );
-
 });
 
 // router to delete a recipe
-router.delete('/recipe/:id', (req, res) => {
-  const id  = req.params.id;
-  const db = require('../server').db;
+router.delete("/recipe/:id", (req, res) => {
+  const id = req.params.id;
+  const db = require("../server").db;
 
-  const sql = 'DELETE FROM recipes WHERE id = ?';
+  const sql = "DELETE FROM recipes WHERE id = ?";
 
   db.query(sql, [id], (err, results) => {
     if (err) {
-      console.error('Error deleting recipe:', err);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error deleting recipe:", err);
+      res.status(500).json({ error: "Internal Server Error" });
       return;
     }
-    console.log('Rows affected:', results.affectedRows);
-    res.json({ message: 'Recipe deleted successfully' });
+    console.log("Rows affected:", results.affectedRows);
+    res.json({ message: "Recipe deleted successfully" });
   });
 });
 
 // Search recipes by difficulty
-router.get('/recipes/search', (req, res) => {
-    const db = require('../server').db;
-    const { time, difficulty } = req.query;
+router.get("/recipes/search", (req, res) => {
+  const db = require("../server").db;
+  const { time, difficulty } = req.query;
 
-    // Check if at least one parameter is provided
-    if (!time && !difficulty) {
-      return res.status(400).json({ error: 'At least one parameter (time or difficulty) is required' });
+  // Check if at least one parameter is provided
+  if (!time && !difficulty) {
+    return res
+      .status(400)
+      .json({
+        error: "At least one parameter (time or difficulty) is required",
+      });
+  }
+
+  // Build the WHERE clause based on provided parameters
+  let whereClause = "";
+  let params = [];
+
+  if (time) {
+    whereClause += "time <= ?";
+    params.push(Number(time));
+  }
+
+  if (difficulty) {
+    if (whereClause) {
+      whereClause += " AND ";
+    }
+    whereClause += "difficulty = ?";
+    params.push(Number(difficulty));
+  }
+
+  const query = `SELECT * FROM recipes${
+    whereClause ? " WHERE " + whereClause : ""
+  }`;
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      console.error("Error executing search query:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
-    // Build the WHERE clause based on provided parameters
-    let whereClause = '';
-    let params = [];
-
-    if (time) {
-      whereClause += 'time <= ?';
-      params.push(Number(time));
-    }
-
-    if (difficulty) {
-      if (whereClause) {
-        whereClause += ' AND ';
-      }
-      whereClause += 'difficulty <= ?';
-      params.push(Number(difficulty));
-    }
-
-    const query = `SELECT * FROM recipes${whereClause ? ' WHERE ' + whereClause : ''}`;
-
-    db.query(query, params, (error, results) => {
-      if (error) {
-        console.error('Error executing search query:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-
-      res.json(results);
-    });
+    res.json(results);
   });
-
+});
 
 // USER RELATED ROUTES
 

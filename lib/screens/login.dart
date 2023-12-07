@@ -6,6 +6,7 @@ import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 
 class Login extends StatelessWidget {
+<<<<<<< HEAD
   final AuthService auth;
   const Login({super.key, required String title, required this.auth});
 
@@ -17,6 +18,10 @@ class Login extends StatelessWidget {
     return auth.getUsername();
   }
 
+=======
+  Login({super.key});
+  final AuthService auth = AuthService();
+>>>>>>> main
 
   @override
   Widget build(BuildContext context) {
@@ -80,15 +85,15 @@ class LoggedInScreen extends StatelessWidget {
   final AuthService auth;
   const LoggedInScreen({super.key, required this.auth});
 
-  Future<List<Recipe>> allRecipes() async {
-    return await fetchAllRecipes();
+  Future<List<Recipe>> userRecipes() async {
+    return await fetchUserRecipes(userId!);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 255, 249, 240),
         appBar: AppBar(
           backgroundColor: Colors.grey[850],
           title: const Text(
@@ -100,8 +105,10 @@ class LoggedInScreen extends StatelessWidget {
           ),
         ),
         body: SingleChildScrollView(
+          // Account icon/picture and username
           child: Column(
             children: [
+<<<<<<< HEAD
               SizedBox(
                 height: 100.0,
                 child: Text(
@@ -110,10 +117,55 @@ class LoggedInScreen extends StatelessWidget {
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
+=======
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.account_circle,
+                      size: 124.0,
+                      color: Colors.grey[350],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0, left: 5.0),
+                      child: Text(
+                        username,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+>>>>>>> main
                 ),
               ),
+
+              // Display the number of recipes the user has
               FutureBuilder(
-                future: allRecipes(),
+                  future: userRecipes(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      String recipeCount = snapshot.data!.length.toString();
+                      return (Text(
+                        '$recipeCount recipes',
+                        style: TextStyle(
+                          color: Colors.amber[900],
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ));
+                    } else if (snapshot.hasError) {
+                      return Text('${snapshot.error}');
+                    }
+                    return const CircularProgressIndicator();
+                  }),
+              // User recieps
+              FutureBuilder(
+                future: userRecipes(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Column(
@@ -121,6 +173,8 @@ class LoggedInScreen extends StatelessWidget {
                         snapshot.data!.length,
                         (index) => RecipePreview(
                           title: snapshot.data![index].title,
+                          difficultyLevel: snapshot.data![index].difficulty,
+                          time: snapshot.data![index].time,
                           shortDescription:
                               snapshot.data![index].shortDescription,
                           imageLink: snapshot.data![index].imageLink,
@@ -149,12 +203,23 @@ class LoggedInScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // Trigger the logout function when the button is pressed.
+<<<<<<< HEAD
                   await auth.logout().then((value) => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => Login(title: '', auth: auth),
                         ),
                       ));
+=======
+                  await AuthService().logout();
+                  // Navigate back to the login screen after logging out.
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Login(),
+                    ),
+                  );
+>>>>>>> main
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
