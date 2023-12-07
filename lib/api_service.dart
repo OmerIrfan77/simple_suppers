@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://10.0.2.2:3000/api';
+const String apiUrl = 'http://localhost:3000/api';
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
@@ -113,11 +113,11 @@ Future<int?> addRecipe({
   try {
     if (recipeId == 0) {
       response = await http.post(
-      Uri.parse('$apiUrl/recipes'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(data),
+        Uri.parse('$apiUrl/recipes'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(data),
       );
       print('Adding recipe');
     } else {
