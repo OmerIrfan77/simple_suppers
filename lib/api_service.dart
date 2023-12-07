@@ -25,11 +25,9 @@ Future<List<Recipe>> fetchUserRecipes(int userId) async {
     List<Recipe> recipes = [];
     for (var recipe in json.decode(response.body)) {
       recipes.add(Recipe.transform(recipe));
-      Logger("scubadive");
     }
     return recipes;
   } else {
-    Logger("ajajajaj");
     throw Exception('API Error: ${response.statusCode}');
   }
 }
