@@ -6,7 +6,7 @@ import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 
 class Login extends StatelessWidget {
-  Login({super.key, required String title});
+  Login({super.key});
   final AuthService auth = AuthService();
 
   @override
@@ -182,9 +182,7 @@ class LoggedInScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Login(
-                        title: '',
-                      ),
+                      builder: (context) => Login(),
                     ),
                   );
                 },
@@ -233,7 +231,7 @@ class LoginFormState extends State<LoginForm> {
 
   void _navigateToLoggedInScreen(
       BuildContext context, String username, int? userId) {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => LoggedInScreen(
