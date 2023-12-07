@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:simple_suppers/api_service.dart'; // Import your API service here
+import 'package:simple_suppers/api_service.dart';
 
 class DeleteMenuWidget extends StatelessWidget {
-  final int recipeUserId; // Assuming you have the recipe user ID
+  final int recipeUserId;
+  final AuthService auth;
   final Function onDeleteSuccess;
 
   const DeleteMenuWidget({
     Key? key,
     required this.recipeUserId,
+    required this.auth,
     required this.onDeleteSuccess,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: _isUserAuthorized(), // Hide the menu if not authorized
+      visible: _isUserAuthorized(auth),
       child: PopupMenuButton<String>(
         onSelected: (value) {
           if (value == 'delete') {
@@ -33,36 +35,30 @@ class DeleteMenuWidget extends StatelessWidget {
     );
   }
 
-  bool _isUserAuthorized() {
-    // Fetch the logged-in user ID from your authentication system
-    int loggedInUserId =
-        getLoggedInUserId(); // Replace with your actual function
+  bool _isUserAuthorized(AuthService auth) {
+    int loggedInUserId = auth.getId();
 
-    // Check if the logged-in user ID matches the recipe user ID
     return recipeUserId == loggedInUserId;
   }
 
   Future<void> _onDelete(BuildContext context) async {
-    try {
-      // Make an API call to delete the recipe
-      await deleteRecipe(); // Replace with your actual API call
 
-      // Show success snack bar
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Recipe deleted successfully'),
-        ),
-      );
+    await deleteRecipe().then((value) {
+      if (value) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recipe deleted successfully'),
+          ),
+        );
+        onDeleteSuccess();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete recipe.'),
+          ),
+        );
+      }
+    });
 
-      // Call the provided callback for additional actions on success
-      onDeleteSuccess();
-    } catch (error) {
-      // Show error snack bar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to delete recipe: $error'),
-        ),
-      );
-    }
   }
 }
