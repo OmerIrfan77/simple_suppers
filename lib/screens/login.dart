@@ -72,8 +72,8 @@ class LoggedInScreen extends StatelessWidget {
   final int? userId;
   const LoggedInScreen({required this.username, this.userId});
 
-  Future<List<Recipe>> allRecipes() async {
-    return await fetchAllRecipes();
+  Future<List<Recipe>> userRecipes() async {
+    return await fetchUserRecipes(userId!);
   }
 
   @override
@@ -105,7 +105,7 @@ class LoggedInScreen extends StatelessWidget {
                 ),
               ),
               FutureBuilder(
-                future: allRecipes(),
+                future: userRecipes(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Column(
@@ -197,7 +197,7 @@ class LoginFormState extends State<LoginForm> {
 
   void _navigateToLoggedInScreen(
       BuildContext context, String username, int? userId) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => LoggedInScreen(

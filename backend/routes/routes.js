@@ -19,6 +19,25 @@ router.get('/recipes', (req, res) => {
     });
 });
 
+// Get all recipes owned by logged in user
+router.get('/recipes/user/:userId', (req, res) => {
+  const db = require('../server').db;
+
+  // Get the user id
+  const userId = req.params.userId;
+
+  const query = 'SELECT * FROM recipes WHERE creator_id = ?';
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error('Error executing query: ', error);
+      res.status(500).json({ error: 'Internal Server Error'});
+    } else {
+      res.json(results);
+    }
+  })
+})
+
 // Get a single recipe
 router.get('/recipe/:id', (req, res) => {
     const db = require('../server').db;

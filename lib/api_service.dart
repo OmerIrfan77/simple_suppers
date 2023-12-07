@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 
-const String apiUrl = 'http://10.0.2.2:3000/api';
+const String apiUrl = 'http://localhost:3000/api';
 
 Future<List<Recipe>> fetchAllRecipes() async {
   final response = await http.get(Uri.parse('$apiUrl/recipes'));
@@ -14,6 +15,21 @@ Future<List<Recipe>> fetchAllRecipes() async {
     }
     return recipes;
   } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
+Future<List<Recipe>> fetchUserRecipes(int userId) async {
+  final response = await http.get(Uri.parse('$apiUrl/recipes/user/$userId'));
+  if (response.statusCode == 200) {
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+      Logger("scubadive");
+    }
+    return recipes;
+  } else {
+    Logger("ajajajaj");
     throw Exception('API Error: ${response.statusCode}');
   }
 }
@@ -113,11 +129,11 @@ Future<int?> addRecipe({
   try {
     if (recipeId == 0) {
       response = await http.post(
-      Uri.parse('$apiUrl/recipes'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(data),
+        Uri.parse('$apiUrl/recipes'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(data),
       );
       print('Adding recipe');
     } else {
