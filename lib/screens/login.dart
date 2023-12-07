@@ -6,7 +6,6 @@ import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 
 class Login extends StatelessWidget {
-<<<<<<< HEAD
   final AuthService auth;
   const Login({super.key, required String title, required this.auth});
 
@@ -18,10 +17,6 @@ class Login extends StatelessWidget {
     return auth.getUsername();
   }
 
-=======
-  Login({super.key});
-  final AuthService auth = AuthService();
->>>>>>> main
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +81,7 @@ class LoggedInScreen extends StatelessWidget {
   const LoggedInScreen({super.key, required this.auth});
 
   Future<List<Recipe>> userRecipes() async {
-    return await fetchUserRecipes(userId!);
+    return await fetchUserRecipes(auth.getId()!);
   }
 
   @override
@@ -108,16 +103,6 @@ class LoggedInScreen extends StatelessWidget {
           // Account icon/picture and username
           child: Column(
             children: [
-<<<<<<< HEAD
-              SizedBox(
-                height: 100.0,
-                child: Text(
-                  "username is: ${auth.getUsername()}, and id is: ${auth.getId()}",
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-=======
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
@@ -132,15 +117,14 @@ class LoggedInScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0, left: 5.0),
                       child: Text(
-                        username,
-                        style: TextStyle(
+                        auth.getUsername()!,
+                        style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ],
->>>>>>> main
                 ),
               ),
 
@@ -203,23 +187,12 @@ class LoggedInScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // Trigger the logout function when the button is pressed.
-<<<<<<< HEAD
                   await auth.logout().then((value) => Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => Login(title: '', auth: auth),
                         ),
                       ));
-=======
-                  await AuthService().logout();
-                  // Navigate back to the login screen after logging out.
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Login(),
-                    ),
-                  );
->>>>>>> main
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
