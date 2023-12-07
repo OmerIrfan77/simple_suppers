@@ -20,7 +20,7 @@ class RecipePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Difficulty difficulty = Difficulty.beginner;
-    int timeTaken = time;
+    // int timeTaken = time;
     TimeUnit timeUnit = TimeUnit.minutes;
     switch (difficultyLevel) {
       case 1:
@@ -34,10 +34,11 @@ class RecipePreview extends StatelessWidget {
         break;
     }
 
-    if (timeTaken > 60) {
-      timeTaken = timeTaken ~/ 60;
-      timeUnit = TimeUnit.hours;
-    }
+    // if (timeTaken > 60) {
+    //   timeTaken = timeTaken ~/ 60;
+    //   print('Time taken: $timeTaken');
+    //   timeUnit = TimeUnit.hours;
+    // }
 
     return GestureDetector(
       onTap: onTap,
@@ -97,7 +98,7 @@ class RecipePreview extends StatelessWidget {
                           children: [
                             DifficultyLabel(difficultyLevel: difficulty),
                             const SizedBox(width: 10.0),
-                            TimeLabel(amount: time.toString(), unit: timeUnit),
+                            TimeLabel(amount: time, unit: timeUnit),
                           ],
                         ),
                         const SizedBox(

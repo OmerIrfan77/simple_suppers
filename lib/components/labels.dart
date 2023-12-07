@@ -37,13 +37,20 @@ class DifficultyLabel extends StatelessWidget {
 enum TimeUnit { minutes, hours }
 
 class TimeLabel extends StatelessWidget {
-  final String amount;
-  final TimeUnit unit;
+  int amount;
+  TimeUnit unit;
 
-  const TimeLabel({super.key, required this.amount, required this.unit});
+  TimeLabel({super.key, required this.amount, required this.unit});
 
   @override
   Widget build(BuildContext context) {
+    double time = amount.toDouble();
+    String displayTime = amount.toString();
+    if (time > 60) {
+      time = time / 60;
+      displayTime = time.toStringAsFixed(1);
+      unit = TimeUnit.hours;
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
@@ -58,7 +65,7 @@ class TimeLabel extends StatelessWidget {
                   size: 20.0, color: Colors.white),
               const SizedBox(width: 5.0),
               Text(
-                amount + (unit == TimeUnit.minutes ? 'm' : 'h'),
+                displayTime + (unit == TimeUnit.minutes ? 'm' : 'h'),
                 style: const TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               )

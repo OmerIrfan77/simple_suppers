@@ -63,12 +63,12 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         left: 10,
                         child: Row(children: [
                           Text(
-                          recipe.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
+                            recipe.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           if (widget.recipeId != //change to creatorId later
                               0) // Conditionally show the Icon child
@@ -95,7 +95,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         bottom: 10,
                         right: 10,
                         child: TimeLabel(
-                            amount: '${recipe.time}', unit: TimeUnit.minutes))
+                            amount: recipe.time, unit: TimeUnit.minutes))
                   ]),
                   // Description in orange box
                   // Using Row() + Expanded() fill the horizontal space with orange container
