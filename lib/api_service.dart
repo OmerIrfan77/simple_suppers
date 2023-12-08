@@ -22,6 +22,32 @@ Future<List<Recipe>> fetchAllRecipes() async {
   }
 }
 
+Future<List<Recipe>> fetchAllRecipesLoggedIn(int userId) async {
+  final response = await http.get(Uri.parse('$apiUrl/recipes/$userId'));
+  if (response.statusCode == 200) {
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
+Future<List<Recipe>> fetchAllPublicRecipes() async {
+  final response = await http.get(Uri.parse('$apiUrl/recipes'));
+  if (response.statusCode == 200) {
+    List<Recipe> recipes = [];
+    for (var recipe in json.decode(response.body)) {
+      recipes.add(Recipe.transform(recipe));
+    }
+    return recipes;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
 Future<List<Recipe>> fetchUserRecipes(int userId) async {
   final response = await http.get(Uri.parse('$apiUrl/recipes/user/$userId'));
   if (response.statusCode == 200) {

@@ -70,8 +70,10 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          if (widget.recipeId != //change to creatorId later
-                              0) // Conditionally show the Icon child
+                          if (AuthService().isLoggedIn() &&
+                              recipe.creatorId ==
+                                  AuthService()
+                                      .getId()) // Conditionally show the Icon child
                             IconButton(
                               icon: const Icon(Icons.edit),
                               color: Colors.white,
@@ -80,7 +82,8 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => RecipeFormPage(
-                                          recipeId: widget.recipeId),
+                                          recipeId: widget.recipeId,
+                                          isEditing: true),
                                     ));
                               },
                             ),
