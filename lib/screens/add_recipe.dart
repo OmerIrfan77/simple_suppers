@@ -23,7 +23,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController timeController = TextEditingController();
   TextEditingController budgetController = TextEditingController();
-  List<String> steps = [];
+  List<String> steps = [''];
   List<String> publicList = <String>['Yes', 'No'];
   String publicDropdownValue = "Yes";
   var difficultyList = [1, 2, 3];
@@ -304,9 +304,17 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   IconButton(
                                     icon: const Icon(Icons.remove),
                                     onPressed: () {
-                                      setState(() {
+                                      if (steps.length == 1) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content: Text('At least one step!'),
+                                        ));
+                                      } else {
+                                        setState(() {
                                         steps.removeAt(i);
-                                      });
+                                        });
+                                      }
+
                                     },
                                   ),
                                 ],
@@ -348,9 +356,11 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                         _refreshData();
                                       }
                                     } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
                                       const SnackBar(
                                         content: Text('Failed to add recipe!'),
-                                      );
+                                      ));
                                     }
                                   }
                                 }
