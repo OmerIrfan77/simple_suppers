@@ -78,12 +78,12 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                 final recipeInfo = snapshot.data;
                 loaded = true;
 
-                if (recipeInfo != null) {
+                if (recipeInfo != null && recipeInfo[0] != null) {
                   ingredients = recipeInfo[1];
-                  imageUrlController.text = recipeInfo[0].getImageLink()!;
+                  imageUrlController.text = recipeInfo[0].getImageLink();
                   titleController.text = recipeInfo[0].getTitle();
                   descriptionController.text =
-                      recipeInfo[0].getShortDescription()!;
+                      recipeInfo[0].getShortDescription();
                   timeController.text = recipeInfo[0].getTime().toString();
                   budgetController.text = recipeInfo[0].getBudget();
                   steps = recipeInfo[0].getInstructions().split(';');
@@ -321,8 +321,12 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                       Expanded(
                                         child: TextFormField(
                                           controller: TextEditingController(
-                                              text: (ingredients[i].quantity)
-                                                  .toString()),
+                                              text: ingredients[i].quantity !=
+                                                      null
+                                                  ? (ingredients[i]
+                                                      .quantity
+                                                      .toString())
+                                                  : null),
                                           decoration: const InputDecoration(
                                             labelText: 'Amount',
                                             hintText: 'e.g. 3',
