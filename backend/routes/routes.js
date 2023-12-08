@@ -392,4 +392,33 @@ router.delete('/api/ingredients/:id', (req, res) => {
   });
 });
 
+
+router.post('/recipe-ingredients', (req, res) => {
+  try {
+    const { recipeId, ingredientId, quantity } = req.body;
+
+    // Check if the required fields are provided
+    if (!recipeId || !ingredientId || !quantity) {
+      return res.status(400).json({ error: 'Recipe ID, Ingredient ID, and Quantity are required' });
+    }
+
+    // Add a new row to the recipe_ingredients table
+    db.query(
+      'INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)',
+      [recipeId, ingredientId, quantity],
+      (err, result) => {
+        if (err) {
+          console.error('Error inserting into recipe_ingredients table:', err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        return res.status(201).json({ message: 'Row added to recipe_ingredients successfully', id: result.insertId });
+      }
+    );
+  } catch (err) {
+    console.error('Exception:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;

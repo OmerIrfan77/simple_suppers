@@ -202,8 +202,7 @@ Future<void> updateIngredient(
 }
 
 Future<Map<String, dynamic>> addIngredientToRecipe(
-  String name,
-  String unit,
+  int ingredientId,
   int recipeId,
   int quantity,
 ) async {
@@ -213,8 +212,7 @@ Future<Map<String, dynamic>> addIngredientToRecipe(
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode({
-      'name': name,
-      'unit': unit,
+      'ingredientId': ingredientId,
       'recipeId': recipeId,
       'quantity': quantity,
     }),
