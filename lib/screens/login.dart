@@ -23,7 +23,7 @@ class _LoginState extends State<Login> {
   }
 
   Future<List<Recipe>> userRecipes() async {
-    return await fetchUserRecipes(widget.auth.getId()!);
+    return await fetchUserRecipes(AuthService().getId()!);
   }
 
   Widget LoggedIn() {
