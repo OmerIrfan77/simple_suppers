@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:logging/logging.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -189,7 +188,7 @@ class AuthService {
     _id = _prefs?.getInt('id');
   }
 
-  void _saveLoginStatus(bool isLoggedIn, String? username, int? id) {
+  void _saveLoginStatus(bool isLoggedIn, String? username, int? id) async {
     _prefs?.setBool('isLoggedIn', isLoggedIn);
     _prefs?.setString('username', username ?? '');
     _prefs?.setInt('id', id ?? 0);
@@ -227,7 +226,6 @@ class AuthService {
       _saveLoginStatus(false, null, null);
       return false;
     }
-    print('Logged in user (after login): $_username');
     return true;
   }
 

@@ -8,16 +8,14 @@ import 'package:simple_suppers/bottom_bar.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
 import 'package:simple_suppers/screens/search_results.dart';
 import 'package:simple_suppers/search_filter_bottom_sheet.dart';
-// import the 'api_service.dart' file from backend folder
 import 'api_service.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-  final AuthService auth = AuthService();
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +25,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
         useMaterial3: true,
       ),
-      home: MyHomePage(
+      home: const MyHomePage(
         title: 'SimpleSuppers',
-        auth: auth,
       ),
     );
   }
@@ -37,8 +34,7 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final String title;
-  final AuthService auth;
-  const MyHomePage({super.key, required this.title, required this.auth});
+  const MyHomePage({super.key, required this.title});
 
 
   @override
@@ -167,10 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bodyWidget = homeWidget;
         break;
       case 4:
-        bodyWidget = Login(
-          title: '',
-          auth: widget.auth,
-        );
+        bodyWidget = const Login(title: '');
         break;
       default:
         bodyWidget = homeWidget;

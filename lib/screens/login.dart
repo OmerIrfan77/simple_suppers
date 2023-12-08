@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
-import 'package:simple_suppers/main.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 
+
 class Login extends StatelessWidget {
-  final AuthService auth;
-  const Login({super.key, required String title, required this.auth});
+  const Login({super.key, required String title});
 
   Future<bool> _checkLoginStatus() async {
-    return auth.isLoggedIn();
+    return AuthService().isLoggedIn();
   }
 
   Future<String?> _getUsername() async {
-    return auth.getUsername();
+    return AuthService().getUsername();
   }
 
 
@@ -32,9 +31,7 @@ class Login extends StatelessWidget {
               future: _getUsername(),
               builder: (context, usernameSnapshot) {
                 if (usernameSnapshot.connectionState == ConnectionState.done) {
-                  return LoggedInScreen(
-                    auth: auth,
-                  );
+                  return const LoggedInScreen();
                 } else {
                   return const CircularProgressIndicator();
                 }
@@ -61,9 +58,7 @@ class Login extends StatelessWidget {
                         Container(
                             padding: const EdgeInsets.only(
                                 left: 15, top: 60, right: 15),
-                            child: LoginForm(
-                              auth: auth,
-                            )),
+                            child: const LoginForm()),
                       ],
                     )));
           }
@@ -77,11 +72,10 @@ class Login extends StatelessWidget {
 }
 
 class LoggedInScreen extends StatelessWidget {
-  final AuthService auth;
-  const LoggedInScreen({super.key, required this.auth});
+  const LoggedInScreen({super.key});
 
   Future<List<Recipe>> userRecipes() async {
-    return await fetchUserRecipes(auth.getId()!);
+    return await fetchUserRecipes(AuthService().getId()!);
   }
 
   @override
@@ -117,7 +111,7 @@ class LoggedInScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0, left: 5.0),
                       child: Text(
-                        auth.getUsername()!,
+                        AuthService().getUsername()!,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -187,10 +181,10 @@ class LoggedInScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () async {
                   // Trigger the logout function when the button is pressed.
-                  await auth.logout().then((value) => Navigator.push(
+                  await AuthService().logout().then((value) => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Login(title: '', auth: auth),
+                          builder: (context) => const Login(title: ''),
                         ),
                       ));
                 },
@@ -215,10 +209,8 @@ class LoggedInScreen extends StatelessWidget {
 
 // Define a custom Form widget.
 class LoginForm extends StatefulWidget {
-  final AuthService auth;
   const LoginForm(
-      {super.key,
-      required this.auth}); // Constructor, initialises the widget
+      {super.key}); // Constructor, initialises the widget
 
   @override
   LoginFormState createState() {
@@ -239,13 +231,11 @@ class LoginFormState extends State<LoginForm> {
   String? _password;
 
   void _navigateToLoggedInScreen(
-      BuildContext context, AuthService auth) {
+      BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LoggedInScreen(
-          auth: auth,
-        ),
+        builder: (context) => const LoggedInScreen(),
       ),
     );
   }
@@ -342,10 +332,11 @@ class LoginFormState extends State<LoginForm> {
                 // Validate returns true if the form is valid, or false otherwise.
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
-
-                  await widget.auth.login(_username!, _password!).then((value) {
+                  await AuthService()
+                      .login(_username!, _password!)
+                      .then((value) async {
                     if (value == true) {
-                      _navigateToLoggedInScreen(context, widget.auth);
+                      _navigateToLoggedInScreen(context);
                     }
                   });
                 }
