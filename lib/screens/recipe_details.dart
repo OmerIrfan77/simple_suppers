@@ -50,6 +50,22 @@ class _RecipeDetailsState extends State<RecipeDetails> {
               return const Center(child: Text('Recipe not found'));
             }
 
+            Widget getDifficultyLabel() {
+              switch (recipe.difficulty) {
+                case 1:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.beginner);
+                case 2:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.intermediate);
+                case 3:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.advanced);
+                default:
+                  return const Text('Unknown Label');
+              }
+            }
+
             return ListView(children: [
               (Column(
                 mainAxisSize: MainAxisSize.min,
@@ -88,11 +104,10 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                               },
                             ),
                         ])),
-                    const Positioned(
+                    Positioned(
                       bottom: 40,
                       right: 10,
-                      child:
-                          DifficultyLabel(difficultyLevel: Difficulty.beginner),
+                      child: getDifficultyLabel(),
                     ),
                     Positioned(
                         bottom: 10,
