@@ -19,24 +19,40 @@ router.get("/recipes", (req, res) => {
   });
 });
 
+// Get all public recipes
+router.get("/recipes/public", (req, res) => {
+  const db = require("../server").db;
+
+  const query = "SELECT * FROM recipes WHERE is_public = 1";
+
+  db.query(query, (error, results) => {
+    if (error) {
+      console.error("Error executing query: ", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 // Get all recipes owned by logged in user
-router.get('/recipes/user/:userId', (req, res) => {
-  const db = require('../server').db;
+router.get("/recipes/user/:userId", (req, res) => {
+  const db = require("../server").db;
 
   // Get the user id
   const userId = req.params.userId;
 
-  const query = 'SELECT * FROM recipes WHERE creator_id = ?';
+  const query = "SELECT * FROM recipes WHERE creator_id = ?";
 
   db.query(query, [userId], (error, results) => {
     if (error) {
-      console.error('Error executing query: ', error);
-      res.status(500).json({ error: 'Internal Server Error'});
+      console.error("Error executing query: ", error);
+      res.status(500).json({ error: "Internal Server Error" });
     } else {
       res.json(results);
     }
-  })
-})
+  });
+});
 
 // Get a single recipe
 router.get("/recipe/:id", (req, res) => {
@@ -191,11 +207,9 @@ router.get("/recipes/search", (req, res) => {
 
   // Check if at least one parameter is provided
   if (!time && !difficulty) {
-    return res
-      .status(400)
-      .json({
-        error: "At least one parameter (time or difficulty) is required",
-      });
+    return res.status(400).json({
+      error: "At least one parameter (time or difficulty) is required",
+    });
   }
 
   // Build the WHERE clause based on provided parameters
