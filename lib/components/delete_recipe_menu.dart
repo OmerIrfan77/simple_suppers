@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
+import 'package:simple_suppers/main.dart';
 
 class DeleteMenuWidget extends StatelessWidget {
   final bool showMenu;
@@ -53,8 +54,23 @@ class DeleteMenuWidget extends StatelessWidget {
     );
 
     if (confirmDelete == true) {
-      fetchSingleRecipe(5);
-      // _deleteRecipe(context);
+      deleteRecipe(recipeId).then((value) {
+        if (value != null) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Recipe deleted!'),
+          ));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MyHomePage(
+                  title: "SimpleSuppers",
+                ),
+              ));
+        } else {
+          print("Failed to delete");
+        }
+      });
+
     }
   }
 }

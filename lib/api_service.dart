@@ -108,6 +108,16 @@ Future<List<Ingredient>> fetchIngredients(int recipeId) async {
   return ingredients;
 }
 
+
+Future<bool?> deleteRecipe(int recipeId) async {
+  final response = await http.delete(Uri.parse('$apiUrl/recipe/$recipeId'));
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
 Future<int?> addRecipe({
   required int recipeId,
   required String instructions,
