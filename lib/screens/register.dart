@@ -1,41 +1,117 @@
 import 'package:flutter/material.dart';
 
 class Register extends StatelessWidget {
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
+  // Validation function could use some improvment...
+  bool isFormValid() {
+    return usernameController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty &&
+        confirmPasswordController.text.isNotEmpty &&
+        passwordController.text == confirmPasswordController.text;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register'),
+        title: const Text('Register'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
+              controller: usernameController,
               decoration: InputDecoration(
                 labelText: 'Username',
+                labelStyle: TextStyle(
+                  color: Colors.grey,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              style: TextStyle(
+                color: Colors.black,
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
-              decoration: InputDecoration(
-                labelText: 'Email',
-              ),
-            ),
-            SizedBox(height: 16.0),
-            TextField(
+              controller: passwordController,
               decoration: InputDecoration(
                 labelText: 'Password',
+                labelStyle: TextStyle(
+                  color: Colors.grey,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              style: TextStyle(
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            TextField(
+              controller: confirmPasswordController,
+              decoration: InputDecoration(
+                labelText: 'Confirm password',
+                labelStyle: TextStyle(
+                  color: Colors.grey,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+              style: TextStyle(
+                color: Colors.black,
               ),
               obscureText: true,
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                // TODO: Implement registration logic
+                if (isFormValid()) {
+                  // TODO: Implement registration logic
+                  print("form is valid");
+                } else {
+                  print("for NOT VALID");
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          "Something went wrong. Reenter your username and password and try again.")));
+                }
               },
-              child: Text('Register'),
+              style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color.fromARGB(255, 85, 63, 183),
+                  minimumSize: const Size(150, 45)),
+              child: const Text('Register'),
             ),
           ],
         ),
