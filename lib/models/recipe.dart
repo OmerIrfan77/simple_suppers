@@ -1,28 +1,83 @@
 class Recipe {
-  final int id;
-  final String title;
-  final String instructions;
-  final int difficulty;
-  final int time;
-  final String budget;
-  final int isPublic;
-  final int? creatorId;
-  final String? shortDescription;
-  final int? rating;
-  final String? imageLink;
+  int id;
+  String title;
+  String instructions;
+  int difficulty;
+  int time;
+  String budget;
+  int isPublic;
+  int? creatorId;
+  String? shortDescription;
+  int? rating;
+  String? imageLink;
 
-  Recipe(
-      {required this.id,
-      required this.title,
-      required this.instructions,
-      required this.difficulty,
-      required this.time,
-      required this.budget,
-      required this.isPublic,
-      this.creatorId,
-      this.shortDescription,
-      this.rating,
-      this.imageLink});
+  Recipe({
+    required this.id,
+    required this.title,
+    required this.instructions,
+    required this.difficulty,
+    required this.time,
+    required this.budget,
+    required this.isPublic,
+    this.creatorId,
+    this.shortDescription,
+    this.rating,
+    this.imageLink,
+  });
+
+  // Getters
+  int getId() => id;
+  String getTitle() => title;
+  String getInstructions() => instructions;
+  int getDifficulty() => difficulty;
+  int getTime() => time;
+  String getBudget() => budget;
+  int getIsPublic() => isPublic;
+  int? getCreatorId() => creatorId;
+  String? getShortDescription() => shortDescription;
+  int? getRating() => rating;
+  String? getImageLink() => imageLink;
+
+  // Setters
+  void setTitle(String newTitle) {
+    title = newTitle;
+  }
+
+  void setInstructions(String newInstructions) {
+    instructions = newInstructions;
+  }
+
+  void setDifficulty(int newDifficulty) {
+    difficulty = newDifficulty;
+  }
+
+  void setTime(int newTime) {
+    time = newTime;
+  }
+
+  void setBudget(String newBudget) {
+    budget = newBudget;
+  }
+
+  void setIsPublic(int newIsPublic) {
+    isPublic = newIsPublic;
+  }
+
+  void setCreatorId(int? newCreatorId) {
+    creatorId = newCreatorId;
+  }
+
+  void setShortDescription(String? newShortDescription) {
+    shortDescription = newShortDescription;
+  }
+
+  void setRating(int? newRating) {
+    rating = newRating;
+  }
+
+  void setImageLink(String? newImageLink) {
+    imageLink = newImageLink;
+  }
 
   static Recipe transform(Map<String, dynamic> json) {
     return Recipe(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:simple_suppers/api_service.dart'
-    show addRecipe, fetchSingleRecipe;
+import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/models/ingredient.dart';
@@ -50,26 +49,35 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
     }
   }
 
+  Future<List> fetchIngredientsForRecipe() async {
+    Recipe? recipe = await fetchRecipe();
+    List<Ingredient> listIngredient = await fetchIngredients(widget.recipeId);
+    List a = [recipe, listIngredient];
+    return a;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: fetchRecipe(),
+        future: fetchIngredientsForRecipe(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else {
-            final recipe = snapshot.data;
+            final recipeInfo = snapshot.data;
             loaded = true;
 
-            if (recipe != null) {
-              imageUrlController.text = recipe.imageLink!;
-              titleController.text = recipe.title;
-              descriptionController.text = recipe.shortDescription!;
-              timeController.text = recipe.time.toString();
-              budgetController.text = recipe.budget;
-              steps = recipe.instructions.split(';');
-              publicDropdownValue = recipe.isPublic == 1 ? "Yes" : "No";
-              difficultyDropdownValue = recipe.difficulty;
+            if (recipeInfo != null) {
+              ingredients = recipeInfo[1];
+              imageUrlController.text = recipeInfo[0].getImageLink()!;
+              titleController.text = recipeInfo[0].getTitle();
+              descriptionController.text = recipeInfo[0].getShortDescription()!;
+              timeController.text = recipeInfo[0].getTime().toString();
+              budgetController.text = recipeInfo[0].getBudget();
+              steps = recipeInfo[0].getInstructions().split(';');
+              publicDropdownValue =
+                  recipeInfo[0].getIsPublic() == 1 ? "Yes" : "No";
+              difficultyDropdownValue = recipeInfo[0].getDifficulty();
             }
 
             return Form(
@@ -276,14 +284,15 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                             ),
 
                             const SizedBox(height: 16.0),
-                            //Ingredients
-                            // Detailed Instructions
+                            // Ingredients
+                            // Ingredients Section
                             const Text(
                               'Ingredients',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             const SizedBox(height: 8.0),
+                            // Ingredient List
                             for (int i = 0; i < ingredients.length; i++)
                               Row(
                                 children: [
@@ -292,56 +301,52 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                       controller: TextEditingController(
                                           text: (ingredients[i].quantity)
                                               .toString()),
-                                      keyboardType: TextInputType.number,
                                       decoration: const InputDecoration(
-                                          hintText: "Qty. e.g. 5"),
+                                        labelText: 'Amount',
+                                        hintText: 'e.g. 3',
+                                      ),
+                                      keyboardType: TextInputType.number,
                                       onChanged: (value) {
-                                        steps[i] = value;
+                                        ingredients[i].quantity =
+                                            int.tryParse(value);
                                       },
-                                      maxLength: 100,
-                                      maxLengthEnforcement:
-                                          MaxLengthEnforcement.enforced,
                                       validator: (value) {
                                         return (value == null || value.isEmpty)
-                                            ? 'Can not be empty!'
+                                            ? 'Empty!'
                                             : null;
                                       },
                                     ),
                                   ),
                                   Expanded(
                                     child: TextFormField(
-                                      controller:
-                                          TextEditingController(text: steps[i]),
-                                      decoration: InputDecoration(
-                                          labelText: 'Step ${i + 1}'),
+                                      controller: TextEditingController(
+                                          text: ingredients[i].name),
+                                      decoration: const InputDecoration(
+                                          labelText: 'Name',
+                                          hintText: 'e.g. egg'),
                                       onChanged: (value) {
-                                        steps[i] = value;
+                                        ingredients[i].name = value;
                                       },
-                                      maxLength: 100,
-                                      maxLengthEnforcement:
-                                          MaxLengthEnforcement.enforced,
                                       validator: (value) {
                                         return (value == null || value.isEmpty)
-                                            ? 'Can not be empty!'
+                                            ? 'Empty!'
                                             : null;
                                       },
                                     ),
                                   ),
                                   Expanded(
                                     child: TextFormField(
-                                      controller:
-                                          TextEditingController(text: steps[i]),
-                                      decoration: InputDecoration(
-                                          labelText: 'Step ${i + 1}'),
+                                      controller: TextEditingController(
+                                          text: ingredients[i].quantityType),
+                                      decoration: const InputDecoration(
+                                          labelText: 'Unit',
+                                          hintText: 'e.g. dl'),
                                       onChanged: (value) {
-                                        steps[i] = value;
+                                        ingredients[i].quantityType = value;
                                       },
-                                      maxLength: 100,
-                                      maxLengthEnforcement:
-                                          MaxLengthEnforcement.enforced,
                                       validator: (value) {
                                         return (value == null || value.isEmpty)
-                                            ? 'Can not be empty!'
+                                            ? 'Empty!'
                                             : null;
                                       },
                                     ),
@@ -351,13 +356,15 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                     onPressed: () {
                                       if (ingredients.length == 1) {
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                          content:
-                                              Text('At least one ingredient!'),
-                                        ));
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'At least one ingredient!'),
+                                          ),
+                                        );
                                       } else {
                                         setState(() {
-                                          steps.removeAt(i);
+                                          ingredients.removeAt(i);
                                         });
                                       }
                                     },
@@ -368,13 +375,18 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                             ElevatedButton(
                               onPressed: () {
                                 setState(() {
-                                  steps.add('');
+                                  ingredients.add(
+                                    Ingredient(
+                                        name: null,
+                                        quantity: null,
+                                        quantityType: null),
+                                  );
                                 });
                               },
                               style: ElevatedButton.styleFrom(
                                 elevation: 4,
                               ),
-                              child: const Text('+ Add Step'),
+                              child: const Text('+ Add'),
                             ),
                             const SizedBox(height: 16.0),
                             // Detailed Instructions
@@ -554,9 +566,12 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
       descriptionController.text = '';
       timeController.text = '';
       budgetController.text = '';
-      steps = [];
+      steps = [''];
       publicDropdownValue = "Yes";
       difficultyDropdownValue = 1;
+      ingredients = [
+        Ingredient(name: null, quantity: null, quantityType: null),
+      ];
     });
   }
 }
