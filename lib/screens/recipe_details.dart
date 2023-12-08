@@ -3,10 +3,12 @@ import 'package:simple_suppers/components/labels.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
+import 'package:simple_suppers/components/delete_recipe_menu.dart';
 import '../api_service.dart';
 
 // Display detailed view of a recipe, i.e. picture, description,
 // ingredients & instructions, for now.
+typedef VoidCallback = void Function();
 
 class RecipeDetails extends StatefulWidget {
   final int recipeId;
@@ -30,9 +32,34 @@ class _RecipeDetailsState extends State<RecipeDetails> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
-        leading: const BackButton(color: Colors.white),
+        leading: const BackButton(
+          color: Colors.white,
+        ),
         title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        actions: [
+          FutureBuilder<Recipe>(
+            future: singleRecipe(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final recipe = snapshot.data;
+
+                if (recipe == null) {
+                  return Container(); // or handle the absence of recipeUserId as needed
+                }
+
+                return DeleteMenuWidget(
+                  showMenu: recipe.creatorId == AuthService().getId(),
+                  recipeId: recipe.id,
+                );
+              }
+            },
+          )
+        ],
       ),
       body: FutureBuilder(
         future: singleRecipe(),
@@ -72,8 +99,22 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                 children: <Widget>[
                   // Stack text on picture
                   Stack(children: [
-                    Image.network(recipe.imageLink ??
-                        'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg'),
+                    Image.network(
+                      recipe.imageLink ??
+                          'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
+                      },
+                      errorBuilder: (BuildContext context, Object error,
+                          StackTrace? stackTrace) {
+                        return Image.asset('assets/placeholder_image.jpg');
+                      },
+                    ),
                     Positioned(
                         bottom: 10,
                         left: 10,

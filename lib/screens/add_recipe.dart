@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:simple_suppers/api_service.dart'
-    show AuthService, addRecipe, fetchSingleRecipe;
+import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/models/recipe.dart';
+import 'package:simple_suppers/models/ingredient.dart';
 import 'package:logging/logging.dart';
 
 final Logger _logger = Logger('RecipeFormPage');
@@ -25,6 +25,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   TextEditingController timeController = TextEditingController();
   TextEditingController budgetController = TextEditingController();
   List<String> steps = [''];
+  List<Ingredient> ingredients = [
+    Ingredient(name: null, quantity: null, quantityType: null),
+  ];
   List<String> publicList = <String>['Yes', 'No'];
   String publicDropdownValue = "Yes";
   var difficultyList = [1, 2, 3];
@@ -47,6 +50,13 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
     }
   }
 
+  Future<List> fetchIngredientsForRecipe() async {
+    Recipe? recipe = await fetchRecipe();
+    List<Ingredient> listIngredient = await fetchIngredients(widget.recipeId);
+    List a = [recipe, listIngredient];
+    return a;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,23 +70,26 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
               )
             : null,
         body: FutureBuilder(
-            future: fetchRecipe(),
+            future: fetchIngredientsForRecipe(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const CircularProgressIndicator();
               } else {
-                final recipe = snapshot.data;
+                final recipeInfo = snapshot.data;
                 loaded = true;
 
-                if (recipe != null) {
-                  imageUrlController.text = recipe.imageLink!;
-                  titleController.text = recipe.title;
-                  descriptionController.text = recipe.shortDescription!;
-                  timeController.text = recipe.time.toString();
-                  budgetController.text = recipe.budget;
-                  steps = recipe.instructions.split(';');
-                  publicDropdownValue = recipe.isPublic == 1 ? "Yes" : "No";
-                  difficultyDropdownValue = recipe.difficulty;
+                if (recipeInfo != null) {
+                  ingredients = recipeInfo[1];
+                  imageUrlController.text = recipeInfo[0].getImageLink()!;
+                  titleController.text = recipeInfo[0].getTitle();
+                  descriptionController.text =
+                      recipeInfo[0].getShortDescription()!;
+                  timeController.text = recipeInfo[0].getTime().toString();
+                  budgetController.text = recipeInfo[0].getBudget();
+                  steps = recipeInfo[0].getInstructions().split(';');
+                  publicDropdownValue =
+                      recipeInfo[0].getIsPublic() == 1 ? "Yes" : "No";
+                  difficultyDropdownValue = recipeInfo[0].getDifficulty();
                 }
                 if (!AuthService().isLoggedIn()) {
                   return const Center(
@@ -115,6 +128,24 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                                 width: double.infinity,
                                                 height: 200,
                                                 fit: BoxFit.fill,
+                                                loadingBuilder:
+                                                    (BuildContext context,
+                                                        Widget child,
+                                                        ImageChunkEvent?
+                                                            loadingProgress) {
+                                                  if (loadingProgress == null) {
+                                                    return child;
+                                                  } else {
+                                                    return const CircularProgressIndicator();
+                                                  }
+                                                },
+                                                errorBuilder: (BuildContext
+                                                        context,
+                                                    Object error,
+                                                    StackTrace? stackTrace) {
+                                                  return Image.asset(
+                                                      'assets/placeholder_image.jpg');
+                                                },
                                               ),
                                               IconButton(
                                                 icon: const Icon(Icons.edit),
@@ -274,6 +305,116 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                 ),
 
                                 const SizedBox(height: 16.0),
+                                // Ingredients
+                                // Ingredients Section
+                                const Text(
+                                  'Ingredients',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 8.0),
+                                // Ingredient List
+                                for (int i = 0; i < ingredients.length; i++)
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: TextEditingController(
+                                              text: (ingredients[i].quantity)
+                                                  .toString()),
+                                          decoration: const InputDecoration(
+                                            labelText: 'Amount',
+                                            hintText: 'e.g. 3',
+                                          ),
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (value) {
+                                            ingredients[i].quantity =
+                                                int.tryParse(value);
+                                          },
+                                          validator: (value) {
+                                            return (value == null ||
+                                                    value.isEmpty)
+                                                ? 'Empty!'
+                                                : null;
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: TextEditingController(
+                                              text: ingredients[i].name),
+                                          decoration: const InputDecoration(
+                                              labelText: 'Name',
+                                              hintText: 'e.g. egg'),
+                                          onChanged: (value) {
+                                            ingredients[i].name = value;
+                                          },
+                                          validator: (value) {
+                                            return (value == null ||
+                                                    value.isEmpty)
+                                                ? 'Empty!'
+                                                : null;
+                                          },
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: TextEditingController(
+                                              text:
+                                                  ingredients[i].quantityType),
+                                          decoration: const InputDecoration(
+                                              labelText: 'Unit',
+                                              hintText: 'e.g. dl'),
+                                          onChanged: (value) {
+                                            ingredients[i].quantityType = value;
+                                          },
+                                          validator: (value) {
+                                            return (value == null ||
+                                                    value.isEmpty)
+                                                ? 'Empty!'
+                                                : null;
+                                          },
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.remove),
+                                        onPressed: () {
+                                          if (ingredients.length == 1) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                    'At least one ingredient!'),
+                                              ),
+                                            );
+                                          } else {
+                                            setState(() {
+                                              ingredients.removeAt(i);
+                                            });
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                const SizedBox(height: 8.0),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      ingredients.add(
+                                        Ingredient(
+                                            name: null,
+                                            quantity: null,
+                                            quantityType: null),
+                                      );
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    elevation: 4,
+                                  ),
+                                  child: const Text('+ Add'),
+                                ),
+                                const SizedBox(height: 16.0),
                                 // Detailed Instructions
                                 const Text(
                                   'Instructions',
@@ -349,13 +490,17 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                       int? result = await addOrUpdate();
                                       if (mounted) {
                                         if (result != null) {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    RecipeDetails(
-                                                        recipeId: result),
-                                              ));
+                                          if (widget.recipeId != 0) {
+                                            Navigator.pop(context, result);
+                                          } else {
+                                            await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        RecipeDetails(
+                                                            recipeId: result)));
+                                            _refreshData();
+                                          }
                                         } else {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
@@ -441,5 +586,21 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
 
   String buttonText() {
     return widget.recipeId == 0 ? addRecipeButton : updateRecipeButton;
+  }
+
+  void _refreshData() {
+    setState(() {
+      imageUrlController.text = '';
+      titleController.text = '';
+      descriptionController.text = '';
+      timeController.text = '';
+      budgetController.text = '';
+      steps = [''];
+      publicDropdownValue = "Yes";
+      difficultyDropdownValue = 1;
+      ingredients = [
+        Ingredient(name: null, quantity: null, quantityType: null),
+      ];
+    });
   }
 }

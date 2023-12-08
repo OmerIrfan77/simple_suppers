@@ -108,6 +108,16 @@ Future<List<Ingredient>> fetchIngredients(int recipeId) async {
   return ingredients;
 }
 
+
+Future<bool?> deleteRecipe(int recipeId) async {
+  final response = await http.delete(Uri.parse('$apiUrl/recipe/$recipeId'));
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+}
+
 Future<int?> addRecipe({
   required int recipeId,
   required String instructions,
@@ -188,6 +198,67 @@ Future<int?> addRecipe({
     print('Error sending POST/PUT request: $error');
   }
   return null;
+}
+
+//Ingredients:
+Future<Map<String, dynamic>> addIngredient(String name, String unit) async {
+  final response = await http.post(
+    Uri.parse('$apiUrl/ingredients'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'name': name,
+      'unit': unit,
+    }),
+  );
+
+  if (response.statusCode == 201) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to add ingredient');
+  }
+}
+
+Future<void> updateIngredient(
+    String id, Map<String, dynamic> updatedIngredient) async {
+  final response = await http.put(
+    Uri.parse('$apiUrl/api/ingredients/$id'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(updatedIngredient),
+  );
+
+  if (response.statusCode == 200) {
+    print('Ingredient updated successfully');
+  } else {
+    throw Exception('Failed to update ingredient');
+  }
+}
+
+Future<Map<String, dynamic>> addIngredientToRecipe(
+  int ingredientId,
+  int recipeId,
+  int quantity,
+) async {
+  final response = await http.post(
+    Uri.parse('$apiUrl/ingredients'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'ingredientId': ingredientId,
+      'recipeId': recipeId,
+      'quantity': quantity,
+    }),
+  );
+
+  if (response.statusCode == 201) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to add ingredient to recipe');
+  }
 }
 
 // User authentication functions //
