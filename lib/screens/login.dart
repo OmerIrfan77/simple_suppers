@@ -3,6 +3,7 @@ import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
+import 'package:simple_suppers/screens/register.dart';
 
 class Login extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
@@ -207,15 +208,26 @@ class _LoginState extends State<Login> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(left: 15),
-            alignment: Alignment.topLeft,
-            child: const Text(
-              'Forgot your password?',
-              style: TextStyle(fontSize: 10),
+            padding: const EdgeInsets.only(top: 20, left: 15),
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Register()),
+                );
+              },
+              child: const Text(
+                'Register new account',
+                style: TextStyle(
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 75),
+            padding: const EdgeInsets.only(top: 55),
             child: ElevatedButton(
               onPressed: () async {
                 // Validate returns true if the form is valid, or false otherwise.
