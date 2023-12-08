@@ -538,7 +538,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
         difficulty: difficultyDropdownValue,
         time: int.tryParse(timeController.text) ?? 0,
         budget: budgetController.text,
-        creatorId: 1,
+        creatorId: AuthService().getId()!,
         title: titleController.text,
         shortDescription: descriptionController.text,
         isPublic: publicDropdownValue.toLowerCase() == 'yes' ? 1 : 0,
