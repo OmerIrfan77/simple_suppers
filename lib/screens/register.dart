@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:simple_suppers/api_service.dart';
 
 class Register extends StatelessWidget {
   final TextEditingController usernameController = TextEditingController();
@@ -96,12 +97,16 @@ class Register extends StatelessWidget {
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (isFormValid()) {
                   // TODO: Implement registration logic
-                  print("form is valid");
+                  await AuthService().register(
+                      usernameController.text, passwordController.text);
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text(
+                          "New user registered! Enter your credentials to login.")));
+                  Navigator.pop(context);
                 } else {
-                  print("for NOT VALID");
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(
                           "Something went wrong. Reenter your username and password and try again.")));
