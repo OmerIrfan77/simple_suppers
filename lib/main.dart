@@ -36,7 +36,6 @@ class MyHomePage extends StatefulWidget {
   final String title;
   const MyHomePage({super.key, required this.title});
 
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
@@ -49,13 +48,18 @@ class _MyHomePageState extends State<MyHomePage> {
   late Future<List<Recipe>> recipesFuture;
 
   Future<List<Recipe>> allRecipes() async {
-    return await fetchAllRecipes();
+    if (AuthService().isLoggedIn()) {
+      return await fetchAllRecipesLoggedIn(AuthService().getId()!);
+    } else {
+      return await fetchAllPublicRecipes();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    recipesFuture = fetchAllRecipes(); // Initialize the Future in initState
+    recipesFuture =
+        fetchAllPublicRecipes(); // Initialize the Future in initState
   }
 
   // Method to generate a random recipeId
@@ -151,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
         bodyWidget = homeWidget;
         break;
       case 1:
-        bodyWidget = const RecipeFormPage();
+        bodyWidget = RecipeFormPage();
         break;
       case 2:
         bodyWidget = SearchResults(

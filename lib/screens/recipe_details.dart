@@ -77,13 +77,30 @@ class _RecipeDetailsState extends State<RecipeDetails> {
               return const Center(child: Text('Recipe not found'));
             }
 
+            Widget getDifficultyLabel() {
+              switch (recipe.difficulty) {
+                case 1:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.beginner);
+                case 2:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.intermediate);
+                case 3:
+                  return const DifficultyLabel(
+                      difficultyLevel: Difficulty.advanced);
+                default:
+                  return const Text('Unknown Label');
+              }
+            }
+
             return ListView(children: [
               (Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   // Stack text on picture
                   Stack(children: [
-                    Image.network(recipe.imageLink ??
+                    Image.network(
+                      recipe.imageLink ??
                           'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
                       loadingBuilder: (BuildContext context, Widget child,
                           ImageChunkEvent? loadingProgress) {
@@ -103,16 +120,17 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                         left: 10,
                         child: Row(children: [
                           Text(
-                          recipe.title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
+                            recipe.title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          ),
-                          if (recipe.creatorId ==
-                              AuthService()
-                                  .getId()) // Conditionally show the Icon child
+                          if (AuthService().isLoggedIn() &&
+                              recipe.creatorId ==
+                                  AuthService()
+                                      .getId()) // Conditionally show the Icon child
                             IconButton(
                               icon: const Icon(Icons.edit),
                               color: Colors.white,
@@ -121,22 +139,22 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => RecipeFormPage(
-                                          recipeId: widget.recipeId),
-                                    )).then((value) => setState(() {}));
+                                          recipeId: widget.recipeId,
+                                          isEditing: true),
+                                    ));
                               },
                             ),
                         ])),
-                    const Positioned(
+                    Positioned(
                       bottom: 40,
                       right: 10,
-                      child:
-                          DifficultyLabel(difficultyLevel: Difficulty.beginner),
+                      child: getDifficultyLabel(),
                     ),
                     Positioned(
                         bottom: 10,
                         right: 10,
                         child: TimeLabel(
-                            amount: '${recipe.time}', unit: TimeUnit.minutes))
+                            amount: recipe.time, unit: TimeUnit.minutes))
                   ]),
                   // Description in orange box
                   // Using Row() + Expanded() fill the horizontal space with orange container
