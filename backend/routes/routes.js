@@ -35,6 +35,25 @@ router.get("/recipes/public", (req, res) => {
   });
 });
 
+// Get all public recipes and recipes owned by logged in user
+router.get("/recipes/:userId", (req, res) => {
+  const db = require("../server").db;
+
+  // Get the user id
+  const userId = req.params.userId;
+
+  const query = "SELECT * FROM recipes WHERE is_public = 1 OR creator_id = ?";
+
+  db.query(query, [userId], (error, results) => {
+    if (error) {
+      console.error("Error executing query: ", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    } else {
+      res.json(results);
+    }
+  });
+});
+
 // Get all recipes owned by logged in user
 router.get("/recipes/user/:userId", (req, res) => {
   const db = require("../server").db;

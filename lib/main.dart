@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<List<Recipe>> allRecipes() async {
     if (AuthService().isLoggedIn()) {
-      return await fetchAllRecipes();
+      return await fetchAllRecipesLoggedIn(AuthService().getId()!);
     } else {
       return await fetchAllPublicRecipes();
     }
