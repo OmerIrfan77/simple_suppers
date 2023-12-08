@@ -56,6 +56,23 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
+          // Add any additional content for the logged-in state.
+          ElevatedButton(
+            onPressed: () async {
+              // Trigger the logout function when the button is pressed.
+              await AuthService().logout();
+
+              //rerenders the screen, important!
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.red, // Customize button color
+              minimumSize: const Size(150, 45),
+            ),
+            child: const Text('LOGOUT'),
+          ),
+          const SizedBox(height: 20),
 
           // Display the number of recipes the user has
           FutureBuilder(
@@ -109,23 +126,6 @@ class _LoginState extends State<Login> {
               }
               return const CircularProgressIndicator();
             },
-          ),
-          // Add any additional content for the logged-in state.
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              // Trigger the logout function when the button is pressed.
-              await AuthService().logout();
-
-              //rerenders the screen, important!
-              setState(() {});
-            },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.red, // Customize button color
-              minimumSize: const Size(150, 45),
-            ),
-            child: const Text('LOGOUT'),
           ),
         ],
       ),
@@ -283,7 +283,7 @@ class _LoginState extends State<Login> {
                         Container(
                           margin: const EdgeInsets.only(top: 50.0),
                           child: const Text(
-                            'SimpleSuppers',
+                            'Login To Account',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
