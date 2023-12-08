@@ -1,7 +1,7 @@
 class Ingredient {
-  final String name;
-  final int quantity;
-  final String quantityType;
+  final String? name;
+  final int? quantity;
+  final String? quantityType;
 
   Ingredient({
     required this.name,

@@ -2,63 +2,59 @@ import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
 
 class DeleteMenuWidget extends StatelessWidget {
-  final int recipeUserId;
-  final AuthService auth;
-  final Function onDeleteSuccess;
+  final bool showMenu;
+  final int recipeId;
 
   const DeleteMenuWidget({
-    Key? key,
-    required this.recipeUserId,
-    required this.auth,
-    required this.onDeleteSuccess,
-  }) : super(key: key);
+    super.key,
+    required this.showMenu,
+    required this.recipeId,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: _isUserAuthorized(auth),
-      child: PopupMenuButton<String>(
-        onSelected: (value) {
-          if (value == 'delete') {
-            _onDelete(context);
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return <PopupMenuEntry<String>>[
-            const PopupMenuItem<String>(
-              value: 'delete',
-              child: Text('Delete Recipe'),
-            ),
-          ];
+      visible: showMenu,
+      child: IconButton(
+        icon: const Icon(
+          Icons.delete,
+          color: Colors.white,
+        ),
+        onPressed: () {
+          _showDeleteDialog(context);
         },
       ),
     );
   }
 
-  bool _isUserAuthorized(AuthService auth) {
-    int loggedInUserId = auth.getId();
-
-    return recipeUserId == loggedInUserId;
-  }
-
-  Future<void> _onDelete(BuildContext context) async {
-
-    await deleteRecipe().then((value) {
-      if (value) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Recipe deleted successfully'),
-          ),
+  Future<void> _showDeleteDialog(BuildContext context) async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Recipe'),
+          content: const Text('Are you sure you want to delete this recipe?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
         );
-        onDeleteSuccess();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete recipe.'),
-          ),
-        );
-      }
-    });
+      },
+    );
 
+    if (confirmDelete == true) {
+      fetchSingleRecipe(5);
+      // _deleteRecipe(context);
+    }
   }
 }

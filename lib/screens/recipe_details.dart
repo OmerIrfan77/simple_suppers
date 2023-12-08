@@ -3,10 +3,12 @@ import 'package:simple_suppers/components/labels.dart';
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/add_recipe.dart';
+import 'package:simple_suppers/components/delete_recipe_menu.dart';
 import '../api_service.dart';
 
 // Display detailed view of a recipe, i.e. picture, description,
 // ingredients & instructions, for now.
+typedef VoidCallback = void Function();
 
 class RecipeDetails extends StatefulWidget {
   final int recipeId;
@@ -35,6 +37,29 @@ class _RecipeDetailsState extends State<RecipeDetails> {
         ),
         title: const Text('SimpleSuppers',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        actions: [
+          FutureBuilder<Recipe>(
+            future: singleRecipe(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                final recipe = snapshot.data;
+
+                if (recipe == null) {
+                  return Container(); // or handle the absence of recipeUserId as needed
+                }
+
+                return DeleteMenuWidget(
+                  showMenu: recipe.creatorId == AuthService().getId(),
+                  recipeId: recipe.id,
+                );
+              }
+            },
+          )
+        ],
       ),
       body: FutureBuilder(
         future: singleRecipe(),
@@ -85,8 +110,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                             fontWeight: FontWeight.bold,
                           ),
                           ),
-                          if (widget.recipeId != //change to creatorId later
-                              0) // Conditionally show the Icon child
+                          if (recipe.creatorId ==
+                              AuthService()
+                                  .getId()) // Conditionally show the Icon child
                             IconButton(
                               icon: const Icon(Icons.edit),
                               color: Colors.white,

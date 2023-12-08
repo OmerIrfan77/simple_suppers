@@ -4,6 +4,7 @@ import 'package:simple_suppers/api_service.dart'
     show addRecipe, fetchSingleRecipe;
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/models/recipe.dart';
+import 'package:simple_suppers/models/ingredient.dart';
 import 'package:logging/logging.dart';
 
 final Logger _logger = Logger('RecipeFormPage');
@@ -24,6 +25,9 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   TextEditingController timeController = TextEditingController();
   TextEditingController budgetController = TextEditingController();
   List<String> steps = [''];
+  List<Ingredient> ingredients = [
+    Ingredient(name: null, quantity: null, quantityType: null),
+  ];
   List<String> publicList = <String>['Yes', 'No'];
   String publicDropdownValue = "Yes";
   var difficultyList = [1, 2, 3];
@@ -271,6 +275,107 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                               ],
                             ),
 
+                            const SizedBox(height: 16.0),
+                            //Ingredients
+                            // Detailed Instructions
+                            const Text(
+                              'Ingredients',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8.0),
+                            for (int i = 0; i < ingredients.length; i++)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller: TextEditingController(
+                                          text: (ingredients[i].quantity)
+                                              .toString()),
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                          hintText: "Qty. e.g. 5"),
+                                      onChanged: (value) {
+                                        steps[i] = value;
+                                      },
+                                      maxLength: 100,
+                                      maxLengthEnforcement:
+                                          MaxLengthEnforcement.enforced,
+                                      validator: (value) {
+                                        return (value == null || value.isEmpty)
+                                            ? 'Can not be empty!'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller:
+                                          TextEditingController(text: steps[i]),
+                                      decoration: InputDecoration(
+                                          labelText: 'Step ${i + 1}'),
+                                      onChanged: (value) {
+                                        steps[i] = value;
+                                      },
+                                      maxLength: 100,
+                                      maxLengthEnforcement:
+                                          MaxLengthEnforcement.enforced,
+                                      validator: (value) {
+                                        return (value == null || value.isEmpty)
+                                            ? 'Can not be empty!'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: TextFormField(
+                                      controller:
+                                          TextEditingController(text: steps[i]),
+                                      decoration: InputDecoration(
+                                          labelText: 'Step ${i + 1}'),
+                                      onChanged: (value) {
+                                        steps[i] = value;
+                                      },
+                                      maxLength: 100,
+                                      maxLengthEnforcement:
+                                          MaxLengthEnforcement.enforced,
+                                      validator: (value) {
+                                        return (value == null || value.isEmpty)
+                                            ? 'Can not be empty!'
+                                            : null;
+                                      },
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () {
+                                      if (ingredients.length == 1) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                          content:
+                                              Text('At least one ingredient!'),
+                                        ));
+                                      } else {
+                                        setState(() {
+                                          steps.removeAt(i);
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 8.0),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  steps.add('');
+                                });
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 4,
+                              ),
+                              child: const Text('+ Add Step'),
+                            ),
                             const SizedBox(height: 16.0),
                             // Detailed Instructions
                             const Text(
