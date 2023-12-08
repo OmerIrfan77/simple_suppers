@@ -3,6 +3,7 @@ import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/components/recipe_preview.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
+import 'package:simple_suppers/screens/register.dart';
 
 class Login extends StatefulWidget {
   final _formKey = GlobalKey<FormState>();
@@ -55,6 +56,23 @@ class _LoginState extends State<Login> {
               ],
             ),
           ),
+          // Add any additional content for the logged-in state.
+          ElevatedButton(
+            onPressed: () async {
+              // Trigger the logout function when the button is pressed.
+              await AuthService().logout();
+
+              //rerenders the screen, important!
+              setState(() {});
+            },
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.red, // Customize button color
+              minimumSize: const Size(150, 45),
+            ),
+            child: const Text('LOGOUT'),
+          ),
+          const SizedBox(height: 20),
 
           // Display the number of recipes the user has
           FutureBuilder(
@@ -108,23 +126,6 @@ class _LoginState extends State<Login> {
               }
               return const CircularProgressIndicator();
             },
-          ),
-          // Add any additional content for the logged-in state.
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () async {
-              // Trigger the logout function when the button is pressed.
-              await AuthService().logout();
-
-              //rerenders the screen, important!
-              setState(() {});
-            },
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.red, // Customize button color
-              minimumSize: const Size(150, 45),
-            ),
-            child: const Text('LOGOUT'),
           ),
         ],
       ),
@@ -207,15 +208,26 @@ class _LoginState extends State<Login> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.only(left: 15),
-            alignment: Alignment.topLeft,
-            child: const Text(
-              'Forgot your password?',
-              style: TextStyle(fontSize: 10),
+            padding: const EdgeInsets.only(top: 20, left: 15),
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Register()),
+                );
+              },
+              child: const Text(
+                'Register new account',
+                style: TextStyle(
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 75),
+            padding: const EdgeInsets.only(top: 55),
             child: ElevatedButton(
               onPressed: () async {
                 // Validate returns true if the form is valid, or false otherwise.
@@ -271,7 +283,7 @@ class _LoginState extends State<Login> {
                         Container(
                           margin: const EdgeInsets.only(top: 50.0),
                           child: const Text(
-                            'SimpleSuppers',
+                            'Login To Account',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 color: Colors.white,
