@@ -99,21 +99,35 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                 children: <Widget>[
                   // Stack text on picture
                   Stack(children: [
-                    Image.network(
-                      recipe.imageLink ??
-                          'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
-                      loadingBuilder: (BuildContext context, Widget child,
-                          ImageChunkEvent? loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
-                        } else {
-                          return const CircularProgressIndicator();
-                        }
+                    ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return LinearGradient(
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.5),
+                            Colors.transparent
+                          ],
+                          stops: const [0.3, 1.0],
+                        ).createShader(bounds);
                       },
-                      errorBuilder: (BuildContext context, Object error,
-                          StackTrace? stackTrace) {
-                        return Image.asset('assets/placeholder_image.jpg');
-                      },
+                      blendMode: BlendMode.darken,
+                      child: Image.network(
+                        recipe.imageLink ??
+                            'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent? loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          } else {
+                            return const CircularProgressIndicator();
+                          }
+                        },
+                        errorBuilder: (BuildContext context, Object error,
+                            StackTrace? stackTrace) {
+                          return Image.asset('assets/placeholder_image.jpg');
+                        },
+                      ),
                     ),
                     Positioned(
                         bottom: 10,
