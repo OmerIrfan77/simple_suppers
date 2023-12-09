@@ -20,6 +20,9 @@ class Register extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.grey[850],
+          leading: const BackButton(
+            color: Colors.white,
+          ),
           title: const Text(
             'SimpleSuppers',
             style: TextStyle(
