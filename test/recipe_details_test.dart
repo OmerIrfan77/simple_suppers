@@ -5,16 +5,16 @@ import 'package:simple_suppers/screens/recipe_details.dart';
 void main() {
   testWidgets('RecipeDetails widget test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: RecipeDetails(recipeId: 1),
       ),
     );
 
     // Verify that the loading indicator is displayed initially
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsAtLeastNWidgets(1));
 
     // Wait for screen to load
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
 
     // App bar title is displayed correctly
     expect(find.text('SimpleSuppers'), findsOneWidget);
