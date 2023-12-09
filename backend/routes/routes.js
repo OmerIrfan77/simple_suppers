@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 
 const secretKey = process.env.JWT_SECRET_KEY;
 
-
 /**
  * Recipes routes
  */
@@ -34,6 +33,49 @@ router.get("/recipes/public", (req, res) => {
     } else {
       res.json(results);
     }
+  });
+});
+
+// Search recipes by difficulty
+router.get("/recipes/search", (req, res) => {
+  const db = require("../server").db;
+  const { time, difficulty } = req.query;
+
+  // Check if at least one parameter is provided
+  if (!time && !difficulty) {
+    return res.status(400).json({
+      error: "At least one parameter (time or difficulty) is required",
+    });
+  }
+
+  // Build the WHERE clause based on provided parameters
+  let whereClause = "";
+  let params = [];
+
+  if (time) {
+    whereClause += "time <= ?";
+    params.push(Number(time));
+  }
+
+  if (difficulty) {
+    if (whereClause) {
+      whereClause += " AND ";
+    }
+    whereClause += "difficulty = ?";
+    params.push(Number(difficulty));
+  }
+
+  const query = `SELECT * FROM recipes${
+    whereClause ? " WHERE " + whereClause : ""
+  }`;
+
+  db.query(query, params, (error, results) => {
+    if (error) {
+      console.error("Error executing search query:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    res.json(results);
   });
 });
 
@@ -221,51 +263,6 @@ router.delete("/recipe/:id", (req, res) => {
   });
 });
 
-// Search recipes by difficulty
-router.get("/recipes/search", (req, res) => {
-  const db = require("../server").db;
-  const { time, difficulty } = req.query;
-
-  // Check if at least one parameter is provided
-  if (!time && !difficulty) {
-    return res.status(400).json({
-      error: "At least one parameter (time or difficulty) is required",
-    });
-  }
-
-  // Build the WHERE clause based on provided parameters
-  let whereClause = "";
-  let params = [];
-
-  if (time) {
-    whereClause += "time <= ?";
-    params.push(Number(time));
-  }
-
-  if (difficulty) {
-    if (whereClause) {
-      whereClause += " AND ";
-    }
-    whereClause += "difficulty = ?";
-    params.push(Number(difficulty));
-  }
-
-  const query = `SELECT * FROM recipes${
-    whereClause ? " WHERE " + whereClause : ""
-  }`;
-
-  db.query(query, params, (error, results) => {
-    if (error) {
-      console.error("Error executing search query:", error);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
-
-    res.json(results);
-  });
-});
-
-
-
 /**
  * User related routes
  */
@@ -316,55 +313,67 @@ router.post("/login", async (req, res) => {
   );
 });
 
-
-
 /**
  * Ingredients routes
  */
 //Add ingredients
-router.post('/ingredients', (req, res) => {
+router.post("/ingredients", (req, res) => {
   try {
     const db = require("../server").db;
     const { name, unit } = req.body;
 
     if (!name || !unit) {
-      return res.status(400).json({ error: 'Both name and unit are required' });
+      return res.status(400).json({ error: "Both name and unit are required" });
     }
 
     // Check if the ingredient with the same name already exists
-    db.query('SELECT * FROM ingredients WHERE name = ?', [name], (err, results) => {
-      if (err) {
-        console.error('Error querying database:', err);
-        return res.status(500).json({ error: 'Internal Server Error' });
-      }
-
-      if (results.length > 0) {
-        return res.status(400).json({ error: 'Ingredient with the same name already exists', id: results[0].id });
-      }
-
-      // Add a new ingredient to the database
-      db.query('INSERT INTO ingredients (name, quantity_type) VALUES (?, ?)', [name, unit], (err, result) => {
+    db.query(
+      "SELECT * FROM ingredients WHERE name = ?",
+      [name],
+      (err, results) => {
         if (err) {
-          console.error('Error inserting into database:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          console.error("Error querying database:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
         }
 
-        return res.status(201).json({ message: 'Ingredient added successfully', id: result.insertId });
-      });
-    });
+        if (results.length > 0) {
+          return res.status(400).json({
+            error: "Ingredient with the same name already exists",
+            id: results[0].id,
+          });
+        }
+
+        // Add a new ingredient to the database
+        db.query(
+          "INSERT INTO ingredients (name, quantity_type) VALUES (?, ?)",
+          [name, unit],
+          (err, result) => {
+            if (err) {
+              console.error("Error inserting into database:", err);
+              return res.status(500).json({ error: "Internal Server Error" });
+            }
+
+            return res.status(201).json({
+              message: "Ingredient added successfully",
+              id: result.insertId,
+            });
+          }
+        );
+      }
+    );
   } catch (err) {
-    console.error('Exception:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Exception:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 //Get all ingredients
-router.get('/api/ingredients', (req, res) => {
+router.get("/api/ingredients", (req, res) => {
   const db = require("../server").db;
-  db.query('SELECT * FROM ingredients', (err, results) => {
+  db.query("SELECT * FROM ingredients", (err, results) => {
     if (err) {
-      console.error('Error querying database:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
+      console.error("Error querying database:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
 
     return res.status(200).json(results);
@@ -372,85 +381,105 @@ router.get('/api/ingredients', (req, res) => {
 });
 
 //Get one single ingredient
-router.get('/api/ingredients/:id', (req, res) => {
+router.get("/api/ingredients/:id", (req, res) => {
   const db = require("../server").db;
   const ingredientId = req.params.id;
 
-  db.query('SELECT * FROM ingredients WHERE id = ?', [ingredientId], (err, results) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+  db.query(
+    "SELECT * FROM ingredients WHERE id = ?",
+    [ingredientId],
+    (err, results) => {
+      if (err) {
+        console.error("Error querying database:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
 
-    if (results.length === 0) {
-      return res.status(404).json({ error: 'Ingredient not found' });
-    }
+      if (results.length === 0) {
+        return res.status(404).json({ error: "Ingredient not found" });
+      }
 
-    return res.status(200).json(results[0]);
-  });
+      return res.status(200).json(results[0]);
+    }
+  );
 });
 
 //PUT to update a single ingredient
-router.put('/api/ingredients/:id', (req, res) => {
+router.put("/api/ingredients/:id", (req, res) => {
   const db = require("../server").db;
   const ingredientId = req.params.id;
   const updatedIngredient = req.body;
 
-  db.query('UPDATE ingredients SET ? WHERE id = ?', [updatedIngredient, ingredientId], (err) => {
-    if (err) {
-      console.error('Error updating database:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+  db.query(
+    "UPDATE ingredients SET ? WHERE id = ?",
+    [updatedIngredient, ingredientId],
+    (err) => {
+      if (err) {
+        console.error("Error updating database:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
 
-    return res.status(200).json({ message: 'Ingredient updated successfully' });
-  });
+      return res
+        .status(200)
+        .json({ message: "Ingredient updated successfully" });
+    }
+  );
 });
 
 //DETELE a single ingredient
-router.delete('/api/ingredients/:id', (req, res) => {
+router.delete("/api/ingredients/:id", (req, res) => {
   const db = require("../server").db;
   const ingredientId = req.params.id;
 
-  db.query('DELETE FROM ingredients WHERE id = ?', [ingredientId], (err, result) => {
-    if (err) {
-      console.error('Error deleting from database:', err);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+  db.query(
+    "DELETE FROM ingredients WHERE id = ?",
+    [ingredientId],
+    (err, result) => {
+      if (err) {
+        console.error("Error deleting from database:", err);
+        return res.status(500).json({ error: "Internal Server Error" });
+      }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Ingredient not found' });
-    }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: "Ingredient not found" });
+      }
 
-    return res.status(200).json({ message: 'Ingredient deleted successfully' });
-  });
+      return res
+        .status(200)
+        .json({ message: "Ingredient deleted successfully" });
+    }
+  );
 });
 
-
-router.post('/recipe-ingredients', (req, res) => {
+router.post("/recipe-ingredients", (req, res) => {
   try {
     const { recipeId, ingredientId, quantity } = req.body;
 
     // Check if the required fields are provided
     if (!recipeId || !ingredientId || !quantity) {
-      return res.status(400).json({ error: 'Recipe ID, Ingredient ID, and Quantity are required' });
+      return res
+        .status(400)
+        .json({ error: "Recipe ID, Ingredient ID, and Quantity are required" });
     }
 
     // Add a new row to the recipe_ingredients table
     db.query(
-      'INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)',
+      "INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity) VALUES (?, ?, ?)",
       [recipeId, ingredientId, quantity],
       (err, result) => {
         if (err) {
-          console.error('Error inserting into recipe_ingredients table:', err);
-          return res.status(500).json({ error: 'Internal Server Error' });
+          console.error("Error inserting into recipe_ingredients table:", err);
+          return res.status(500).json({ error: "Internal Server Error" });
         }
 
-        return res.status(201).json({ message: 'Row added to recipe_ingredients successfully', id: result.insertId });
+        return res.status(201).json({
+          message: "Row added to recipe_ingredients successfully",
+          id: result.insertId,
+        });
       }
     );
   } catch (err) {
-    console.error('Exception:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Exception:", err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 

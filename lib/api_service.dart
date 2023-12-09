@@ -36,7 +36,7 @@ Future<List<Recipe>> fetchAllRecipesLoggedIn(int userId) async {
 }
 
 Future<List<Recipe>> fetchAllPublicRecipes() async {
-  final response = await http.get(Uri.parse('$apiUrl/recipes'));
+  final response = await http.get(Uri.parse('$apiUrl/recipes/public'));
   if (response.statusCode == 200) {
     List<Recipe> recipes = [];
     for (var recipe in json.decode(response.body)) {
@@ -107,7 +107,6 @@ Future<List<Ingredient>> fetchIngredients(int recipeId) async {
   }
   return ingredients;
 }
-
 
 Future<bool?> deleteRecipe(int recipeId) async {
   final response = await http.delete(Uri.parse('$apiUrl/recipe/$recipeId'));
