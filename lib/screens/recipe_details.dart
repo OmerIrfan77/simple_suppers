@@ -155,7 +155,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                       builder: (context) => RecipeFormPage(
                                           recipeId: widget.recipeId,
                                           isEditing: true),
-                                    ));
+                                    )).then((value) {
+                                  setState(() {});
+                                });
                               },
                             ),
                         ])),
@@ -179,7 +181,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           color: Colors.amber[900],
                           padding: const EdgeInsets.all(15),
                           child: Text(
-                            '${recipe.shortDescription}',
+                            recipe.shortDescription,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 12.0),
                           ),

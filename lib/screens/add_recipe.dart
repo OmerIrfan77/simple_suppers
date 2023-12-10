@@ -4,9 +4,11 @@ import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/screens/recipe_details.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:simple_suppers/models/ingredient.dart';
-import 'package:logging/logging.dart';
+import 'package:logger/logger.dart';
 
-final Logger _logger = Logger('RecipeFormPage');
+var _logger = Logger(
+  printer: PrettyPrinter(),
+);
 
 class RecipeFormPage extends StatefulWidget {
   final int recipeId;
@@ -26,7 +28,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
   TextEditingController budgetController = TextEditingController();
   List<String> steps = [''];
   List<Ingredient> ingredients = [
-    Ingredient(name: null, quantity: null, quantityType: null),
+    Ingredient(),
   ];
   List<String> publicList = <String>['Yes', 'No'];
   String publicDropdownValue = "Yes";
@@ -45,7 +47,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
         return null;
       }
     } catch (e) {
-      _logger.info("No recipe found, initialize with empty add recipe view.");
+      _logger.i("No recipe found, initialize with empty add recipe view.");
       return null;
     }
   }
@@ -76,21 +78,24 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                 return const CircularProgressIndicator();
               } else {
                 final recipeInfo = snapshot.data;
+
                 loaded = true;
 
                 if (recipeInfo != null && recipeInfo[0] != null) {
+                  Recipe foundRecipe = recipeInfo[0];
                   ingredients = recipeInfo[1];
-                  imageUrlController.text = recipeInfo[0].getImageLink();
-                  titleController.text = recipeInfo[0].getTitle();
+                  imageUrlController.text = foundRecipe.getImageLink();
+                  titleController.text = foundRecipe.getTitle();
                   descriptionController.text =
-                      recipeInfo[0].getShortDescription();
-                  timeController.text = recipeInfo[0].getTime().toString();
-                  budgetController.text = recipeInfo[0].getBudget();
-                  steps = recipeInfo[0].getInstructions().split(';');
+                      foundRecipe.getShortDescription();
+                  timeController.text = foundRecipe.getTime().toString();
+                  budgetController.text = foundRecipe.getBudget();
+                  steps = foundRecipe.getInstructions().split(';');
                   publicDropdownValue =
-                      recipeInfo[0].getIsPublic() == 1 ? "Yes" : "No";
-                  difficultyDropdownValue = recipeInfo[0].getDifficulty();
+                      foundRecipe.getIsPublic() == 1 ? "Yes" : "No";
+                  difficultyDropdownValue = foundRecipe.getDifficulty();
                 }
+
                 if (!AuthService().isLoggedIn()) {
                   return const Center(
                     child: Text('Please login to add a recipe!'),
@@ -322,7 +327,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                         child: TextFormField(
                                           controller: TextEditingController(
                                               text: ingredients[i].quantity !=
-                                                      null
+                                                      0
                                                   ? (ingredients[i]
                                                       .quantity
                                                       .toString())
@@ -334,7 +339,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                           keyboardType: TextInputType.number,
                                           onChanged: (value) {
                                             ingredients[i].quantity =
-                                                int.tryParse(value);
+                                                int.parse(value);
                                           },
                                           validator: (value) {
                                             return (value == null ||
@@ -406,10 +411,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                   onPressed: () {
                                     setState(() {
                                       ingredients.add(
-                                        Ingredient(
-                                            name: null,
-                                            quantity: null,
-                                            quantityType: null),
+                                        Ingredient(),
                                       );
                                     });
                                   },
@@ -484,17 +486,38 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                 // Add Recipe Button
                                 ElevatedButton(
                                   onPressed: () async {
+                                    // Create recipe instance
+                                    Recipe recipe = Recipe(
+                                        id: widget.recipeId,
+                                        title: titleController.text,
+                                        instructions: steps.join(";"),
+                                        difficulty: difficultyDropdownValue,
+                                        time:
+                                            int.tryParse(timeController.text) ??
+                                                0,
+                                        budget: budgetController.text,
+                                        creatorId: AuthService().getId()!,
+                                        shortDescription:
+                                            descriptionController.text,
+                                        isPublic:
+                                            publicDropdownValue.toLowerCase() ==
+                                                    'yes'
+                                                ? 1
+                                                : 0,
+                                        rating: 5,
+                                        imageLink: imageUrlController.text);
                                     // Validate returns true if the form is valid, or false otherwise.
                                     if (_formKey.currentState!.validate()) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(content: Text('Done!')),
-                                      );
-                                      // Implement logic to send recipe data to the database
-                                      int? result = await addOrUpdate();
+                                      int? result = await addOrUpdate(
+                                          recipe, ingredients);
                                       if (mounted) {
                                         if (result != null) {
-                                          if (widget.recipeId != 0) {
+                                          if (recipe.id != 0) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                  content: Text('Done!')),
+                                            );
                                             Navigator.pop(context, result);
                                           } else {
                                             await Navigator.push(
@@ -531,19 +554,10 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
             }));
   }
 
-  Future<int?> addOrUpdate() {
-    return addRecipe(
-        recipeId: widget.recipeId,
-        instructions: steps.join(";"),
-        difficulty: difficultyDropdownValue,
-        time: int.tryParse(timeController.text) ?? 0,
-        budget: budgetController.text,
-        creatorId: AuthService().getId()!,
-        title: titleController.text,
-        shortDescription: descriptionController.text,
-        isPublic: publicDropdownValue.toLowerCase() == 'yes' ? 1 : 0,
-        rating: 5,
-        imageLink: imageUrlController.text);
+  Future<int?> addOrUpdate(Recipe recipe, List<Ingredient> ingredients) {
+    return recipe.id == 0
+        ? addRecipe(recipe: recipe, ingredients: ingredients)
+        : updateRecipe(recipe: recipe, ingredients: ingredients);
   }
 
   // Function to show the pop-up window for adding image URL
@@ -603,7 +617,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
       publicDropdownValue = "Yes";
       difficultyDropdownValue = 1;
       ingredients = [
-        Ingredient(name: null, quantity: null, quantityType: null),
+        Ingredient(),
       ];
     });
   }
