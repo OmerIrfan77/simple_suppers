@@ -374,7 +374,7 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                                   ingredients[i].quantityType),
                                           decoration: const InputDecoration(
                                               labelText: 'Unit',
-                                              hintText: 'e.g. dl'),
+                                              hintText: 'e.g. st'),
                                           onChanged: (value) {
                                             ingredients[i].quantityType = value;
                                           },
