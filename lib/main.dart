@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               recipeId: snapshot.data![index].id,
                             ),
                           ),
-                        );
+                        ).then((value) => setState(() {}));
                       },
                     ),
                   ),

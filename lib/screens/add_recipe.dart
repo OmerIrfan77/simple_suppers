@@ -486,7 +486,8 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                 // Add Recipe Button
                                 ElevatedButton(
                                   onPressed: () async {
-                                    // Create recipe instance
+                                    try {
+                                      // Create recipe instance
                                     Recipe recipe = Recipe(
                                         id: widget.recipeId,
                                         title: titleController.text,
@@ -536,6 +537,12 @@ class _RecipeFormPageState extends State<RecipeFormPage> {
                                           ));
                                         }
                                       }
+                                    }
+                                    } on FormatException catch (_) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content: Text('Fields missing!'),
+                                      ));
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
