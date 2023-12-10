@@ -113,8 +113,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       },
                       blendMode: BlendMode.darken,
                       child: Image.network(
-                        recipe.imageLink ??
-                            'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
+                        recipe.imageLink,
                         loadingBuilder: (BuildContext context, Widget child,
                             ImageChunkEvent? loadingProgress) {
                           if (loadingProgress == null) {
