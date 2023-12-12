@@ -116,7 +116,7 @@ class _LoginState extends State<Login> {
                               recipeId: snapshot.data![index].id,
                             ),
                           ),
-                        );
+                        ).then((value) => setState(() {}));
                       },
                     ),
                   ),

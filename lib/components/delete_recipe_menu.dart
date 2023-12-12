@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:simple_suppers/api_service.dart';
 import 'package:simple_suppers/main.dart';
+import 'package:logger/logger.dart';
+
+var _logger = Logger(
+  printer: PrettyPrinter(),
+);
+
 
 class DeleteMenuWidget extends StatelessWidget {
   final bool showMenu;
@@ -55,19 +61,20 @@ class DeleteMenuWidget extends StatelessWidget {
 
     if (confirmDelete == true) {
       deleteRecipe(recipeId).then((value) {
-        if (value != null) {
+        if (value == true) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Recipe deleted!'),
           ));
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const MyHomePage(
-                  title: "SimpleSuppers",
-                ),
-              ));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => const MyHomePage(
+          //         title: "SimpleSuppers",
+          //       ),
+          //     ));
+          Navigator.pop(context);
         } else {
-          print("Failed to delete");
+          _logger.e("Failed to delete");
         }
       });
 

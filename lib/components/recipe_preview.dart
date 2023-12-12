@@ -6,16 +6,16 @@ class RecipePreview extends StatelessWidget {
   final String title;
   final int difficultyLevel;
   final int time;
-  final String? shortDescription;
-  final String? imageLink;
-  RecipePreview(
+  final String shortDescription;
+  final String imageLink;
+  const RecipePreview(
       {super.key,
       required this.onTap,
       required this.title,
       required this.difficultyLevel,
       required this.time,
-      this.shortDescription,
-      this.imageLink});
+      required this.shortDescription,
+      required this.imageLink});
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +70,9 @@ class RecipePreview extends StatelessWidget {
                         bottomRight: Radius.circular(5.0),
                       ),
                       image: DecorationImage(
-                        image: NetworkImage(
-                            imageLink ?? 'https://picsum.photos/200'),
+                        image: _isValidUrl(imageLink)
+                            ? NetworkImage(imageLink) as ImageProvider<Object>
+                            : const AssetImage('assets/placeholder_image.jpg'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -113,7 +114,7 @@ class RecipePreview extends StatelessWidget {
                 padding: const EdgeInsets.all(10.0),
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  shortDescription!,
+                  shortDescription,
                   style: const TextStyle(
                     fontSize: 12.0,
                     color: Color.fromRGBO(97, 97, 97, 1),
@@ -123,5 +124,9 @@ class RecipePreview extends StatelessWidget {
             ],
           )),
     );
+  }
+
+  bool _isValidUrl(String imageLink) {
+    return Uri.tryParse(imageLink)?.isAbsolute ?? false;
   }
 }

@@ -1,40 +1,45 @@
 class Ingredient {
-  String? _name;
-  int? _quantity;
-  String? _quantityType;
+  String name;
+  int quantity;
+  String quantityType;
 
   Ingredient({
-    required String? name,
-    required int? quantity,
-    required String? quantityType,
-  })  : _name = name,
-        _quantity = quantity,
-        _quantityType = quantityType;
+    this.name = "",
+    this.quantity = 0,
+    this.quantityType = "",
+  });
 
-  // Getter methods
-  String? get name => _name;
-  int? get quantity => _quantity;
-  String? get quantityType => _quantityType;
+  // Getters
+  String getName() => name;
+  int getQuantity() => quantity;
+  String getQuantityType() => quantityType;
 
-  // Setter methods
-  set name(String? name) {
-    _name = name;
+  // Setters
+  void setName(String newName) {
+    name = newName;
   }
 
-  set quantity(int? quantity) {
-    _quantity = quantity;
+  void setQuantity(int newQuantity) {
+    quantity = newQuantity;
   }
 
-  set quantityType(String? quantityType) {
-    _quantityType = quantityType;
+  void setQuantityType(String newQuantityType) {
+    quantityType = newQuantityType;
   }
 
-  // Factory method to transform JSON to Ingredient
-  factory Ingredient.transform(Map<String, dynamic> json) {
+  static Ingredient transform(Map<String, dynamic> json) {
     return Ingredient(
       name: json['name'],
       quantity: json['quantity'],
       quantityType: json['quantity_type'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'quantity': quantity,
+      'quantity_type': quantityType,
+    };
   }
 }

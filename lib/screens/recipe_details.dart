@@ -113,8 +113,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                       },
                       blendMode: BlendMode.darken,
                       child: Image.network(
-                        recipe.imageLink ??
-                            'https://kotivara.se/wp-content/uploads/2023/02/Pizza-scaled-1-1024x683.jpg',
+                        recipe.imageLink,
                         loadingBuilder: (BuildContext context, Widget child,
                             ImageChunkEvent? loadingProgress) {
                           if (loadingProgress == null) {
@@ -155,7 +154,9 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                                       builder: (context) => RecipeFormPage(
                                           recipeId: widget.recipeId,
                                           isEditing: true),
-                                    ));
+                                    )).then((value) {
+                                  setState(() {});
+                                });
                               },
                             ),
                         ])),
@@ -179,7 +180,7 @@ class _RecipeDetailsState extends State<RecipeDetails> {
                           color: Colors.amber[900],
                           padding: const EdgeInsets.all(15),
                           child: Text(
-                            '${recipe.shortDescription}',
+                            recipe.shortDescription,
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 12.0),
                           ),

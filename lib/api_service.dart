@@ -4,6 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:simple_suppers/models/ingredient.dart';
 import 'package:simple_suppers/models/recipe.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
+
+var _logger = Logger(
+  printer: PrettyPrinter(),
+);
 
 String apiUrl = Platform.isAndroid
     ? 'http://10.0.2.2:3000/api'
@@ -93,21 +98,6 @@ Future<List<Recipe>> searchRecipes(int? maxTime, int? maxDifficulty) async {
   }
 }
 
-// Fetch all the ingredients for a specific recipe
-Future<List<Ingredient>> fetchIngredients(int recipeId) async {
-  List<Ingredient> ingredients = [];
-  final response =
-      await http.get(Uri.parse('$apiUrl/recipe_ingredients/$recipeId'));
-  if (response.statusCode == 200) {
-    for (var ingredient in json.decode(response.body)) {
-      ingredients.add(Ingredient.transform(ingredient));
-    }
-  } else {
-    throw Exception('API Error: ${response.statusCode}');
-  }
-  return ingredients;
-}
-
 Future<bool?> deleteRecipe(int recipeId) async {
   final response = await http.delete(Uri.parse('$apiUrl/recipe/$recipeId'));
   if (response.statusCode == 200) {
@@ -118,121 +108,112 @@ Future<bool?> deleteRecipe(int recipeId) async {
 }
 
 Future<int?> addRecipe({
-  required int recipeId,
-  required String instructions,
-  required int difficulty,
-  required int time,
-  required String budget,
-  required int creatorId,
-  required String title,
-  required String shortDescription,
-  required int isPublic,
-  required int rating,
-  required String imageLink,
+  required Recipe recipe,
+  required List<Ingredient> ingredients,
 }) async {
-  // Validate input values
-  if (instructions.isEmpty ||
-      difficulty < 1 ||
-      difficulty > 3 ||
-      time <= 0 ||
-      budget.isEmpty ||
-      creatorId <= 0 ||
-      title.isEmpty ||
-      shortDescription.isEmpty ||
-      (isPublic != 0 && isPublic != 1) ||
-      rating < 1 ||
-      rating > 5 ||
-      imageLink.isEmpty) {
-    print('Invalid input values. Please check and try again.');
-    return null;
-  }
-
   // Data to be sent in the request body
-  final Map<String, dynamic> data = {
-    'instructions': instructions,
-    'difficulty': difficulty,
-    'time': time,
-    'budget': budget,
-    'creator_id': creatorId,
-    'title': title,
-    'short_description': shortDescription,
-    'is_public': isPublic,
-    'rating': rating,
-    'image_link': imageLink,
-  };
-
-  final http.Response response;
+  final Map<String, dynamic> recipeData = recipe.toJson();
 
   try {
-    if (recipeId == 0) {
-      response = await http.post(
-        Uri.parse('$apiUrl/recipes'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(data),
-      );
-      print('Adding recipe');
-    } else {
-      response = await http.put(Uri.parse('$apiUrl/recipe/$recipeId'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(data));
-      print('Updating recipe');
-    }
+    http.Response recipeResponse = await http.post(
+      Uri.parse('$apiUrl/recipes'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(recipeData),
+    );
+    _logger.i("Adding recipe");
 
-    if (response.statusCode == 200) {
-      // Recipe added/updated successfully
-      print('Recipe added/updated successfully');
-      print('Response data: ${response.body}');
-      final Map<String, dynamic> responseData = json.decode(response.body);
-      return responseData['recipeId'];
+    if (recipeResponse.statusCode == 200) {
+      // Recipe added successfully
+      _logger.i('Recipe added successfully');
+      _logger.i('Response data: ${recipeResponse.body}');
+      int recipeId = json.decode(recipeResponse.body)['recipeId'] as int;
+      await addIngredients(recipeId, ingredients);
+
+      return recipeId;
     } else {
       // Error adding recipe
-      print('Failed to add/update recipe. Error: ${response.reasonPhrase}');
+      _logger.e('Failed to add recipe. Error: ${recipeResponse.reasonPhrase}');
     }
   } catch (error) {
     // Handle network errors
-    print('Error sending POST/PUT request: $error');
+    _logger.e('Error sending POST request: $error');
   }
   return null;
 }
 
-//Ingredients:
-Future<Map<String, dynamic>> addIngredient(String name, String unit) async {
-  final response = await http.post(
-    Uri.parse('$apiUrl/ingredients'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode({
-      'name': name,
-      'unit': unit,
-    }),
-  );
+Future<int?> updateRecipe({
+  required Recipe recipe,
+  required List<Ingredient> ingredients,
+}) async {
+  // Data to be sent in the request body
+  final Map<String, dynamic> recipeData = recipe.toJson();
 
-  if (response.statusCode == 201) {
-    return json.decode(response.body);
-  } else {
-    throw Exception('Failed to add ingredient');
+  try {
+    http.Response recipeResponse =
+        await http.put(Uri.parse('$apiUrl/recipe/${recipe.id}'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+            },
+            body: jsonEncode(recipeData));
+    _logger.i("Adding recipe");
+
+    if (recipeResponse.statusCode == 200) {
+      // Recipe updated successfully
+      _logger.i('Recipe updated successfully');
+      _logger.i('Response data: ${recipeResponse.body}');
+      int recipeId = json.decode(recipeResponse.body)['recipeId'] as int;
+      await clearRecipeIngredients(recipeId);
+      await addIngredients(recipeId, ingredients);
+
+      return recipeId;
+    } else {
+      // Error updating recipe
+      _logger
+          .e('Failed to update recipe. Error: ${recipeResponse.reasonPhrase}');
+    }
+  } catch (error) {
+    // Handle network errors
+    _logger.e('Error sending PUT request: $error');
+  }
+  return null;
+}
+
+
+//Ingredients:
+Future<void> addIngredients(int recipeId, List<Ingredient> ingredients) async {
+  http.Response response;
+  for (Ingredient ingredient in ingredients) {
+    response = await http.post(
+      Uri.parse('$apiUrl/ingredients'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode({
+        'name': ingredient.name,
+        'unit': ingredient.quantityType,
+      }),
+    );
+
+    if (response.statusCode == 201 || response.statusCode == 400) {
+      int ingredientId = json.decode(response.body)["id"] as int;
+      await addIngredientToRecipe(ingredientId, recipeId, ingredient.quantity);
+    } else {
+      throw Exception('Failed to add ingredient');
+    }
   }
 }
 
-Future<void> updateIngredient(
-    String id, Map<String, dynamic> updatedIngredient) async {
-  final response = await http.put(
-    Uri.parse('$apiUrl/api/ingredients/$id'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(updatedIngredient),
-  );
-
+Future<void> clearRecipeIngredients(int recipeId) async {
+  final response =
+      await http.delete(Uri.parse('$apiUrl/recipe-ingredients/$recipeId'));
   if (response.statusCode == 200) {
-    print('Ingredient updated successfully');
+    return;
+  } else if (response.statusCode == 404) {
+    _logger.w("Recipe ingredients not found!");
   } else {
-    throw Exception('Failed to update ingredient');
+    throw Exception('API Error: ${response.statusCode}');
   }
 }
 
@@ -242,13 +223,13 @@ Future<Map<String, dynamic>> addIngredientToRecipe(
   int quantity,
 ) async {
   final response = await http.post(
-    Uri.parse('$apiUrl/ingredients'),
+    Uri.parse('$apiUrl/recipe-ingredients'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode({
-      'ingredientId': ingredientId,
       'recipeId': recipeId,
+      'ingredientId': ingredientId,
       'quantity': quantity,
     }),
   );
@@ -260,8 +241,23 @@ Future<Map<String, dynamic>> addIngredientToRecipe(
   }
 }
 
-// User authentication functions //
+// Fetch all the ingredients for a specific recipe
+Future<List<Ingredient>> fetchIngredients(int recipeId) async {
+  List<Ingredient> ingredients = [];
+  final response =
+      await http.get(Uri.parse('$apiUrl/recipe-ingredients/$recipeId'));
+  if (response.statusCode == 200) {
+    for (var ingredient in json.decode(response.body)) {
+      ingredients.add(Ingredient.transform(ingredient));
+    }
+  } else {
+    throw Exception('API Error: ${response.statusCode}');
+  }
+  return ingredients;
+}
 
+
+// User authentication functions //
 class AuthService {
   static bool _isLoggedIn = false;
   static String? _username;
